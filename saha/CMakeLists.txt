@@ -1,0 +1,10 @@
+add_subdirectory(src)
+
+set(SOURCES_LIST ${SOURCES_LIST}
+    ${CMAKE_CURRENT_LIST_DIR}/saha.cpp
+     PARENT_SCOPE)
+
+set(HEADERS_LIST ${HEADERS_LIST}
+     ${CMAKE_CURRENT_LIST_DIR}/saha.h
+     PARENT_SCOPE)
+
