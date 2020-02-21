@@ -13,6 +13,7 @@ public:
     std::vector<double> fi;//Массив потенциалов ионизации в а.е.
     std::vector<double> cumFi;//Кумулятивная сумма потенциалов ионизации в а.е.
     std::vector<double> v;//Массив объемов ионных остовов в а.е.
+    std::vector<double> logG;//Стат. веса основного состояния
 };
 
 namespace elements

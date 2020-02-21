@@ -31,6 +31,7 @@ elseif(BUILD_TYPE MATCHES RELEASE)
 endif()
 
 add_subdirectory(saha)
+add_subdirectory(mix)
 
 set(SOURCES_LIST ${SOURCES_LIST}
      ${CMAKE_CURRENT_LIST_DIR}/main.cpp)

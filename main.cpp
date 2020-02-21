@@ -4,6 +4,11 @@
 #include "saha/saha.h"
 #include <math.h>
 
+#include "mix/mixdata.h"
+#include "mix/sahaleft.h"
+#include "mix/findroot.h"
+#include "saha/src/atom_ed.h"
+
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -108,16 +113,21 @@ int main()
 {	
 	try
 	{
+        MixData md({82, 29},{0.5, 0.5},0.6,true, 10, 100);
+        SahaLeft sl;
+
+        //saha::Point ppp;
+        //ppp = saha::Calculate(82, 1, 2);
+
+        FindRoot findroot;
+        double xe = findroot(-746, log(double(82)), [&](double x) {return sl(md, md.V, x);}, 1e-7, md.T, md.V);
+
+        //printf("sl = %g xe = %g (%g)\n", sl(md, md.V, xe), ppp.Xe, xe);
+        printf("sl = %g xe = %g\n", sl(md, md.V, xe), xe);
+
 		//CrashTest(0.6, -3, 6.01, 0.05, -1.51, 4.6, 0.05);
-        calculator(82, 0.6, -3, 6.01, 0.05, -5.51, 4.6, 0.05, "saha_Pb.m");
+        //calculator(82, 0.6, -3, 6.01, 0.05, -5.51, 4.6, 0.05, "saha_Pb.m");
 
-		saha::Point ppp;
-		ppp = saha::Calculate(26, 1.5, 2);
-
-		printf("\n%d %g %g\n", ppp.Z, ppp.P, ppp.lgKappa);
-
-		ppp = saha::Calculate(26, 1.5, 2.5);
-		printf("%d %g %g\n", ppp.Z, ppp.P, ppp.lgKappa);
 	}
 	catch (std::exception& r)
 	{

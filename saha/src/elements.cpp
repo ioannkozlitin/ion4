@@ -876,6 +876,9 @@ TElement::TElement(unsigned int z, double rCoeff, bool correctV0)
     cumFi.resize(z);
     v.resize(z+1);
 
+    logG.resize(z+1, log(2.0));
+    logG[z] = 0;
+
     //printf("z = %d : ",z);
 
     double sum = 0;
