@@ -5,8 +5,8 @@
 #include <math.h>
 
 #include "mix/mixdata.h"
-#include "mix/sahaleft.h"
-#include "mix/findroot.h"
+#include "mix/sahamixsolver.h"
+
 #include "saha/src/atom_ed.h"
 
 #include <cstdio>
@@ -113,17 +113,10 @@ int main()
 {	
 	try
 	{
-        MixData md({82, 29},{0.5, 0.5},0.6,true, 10, 100);
-        SahaLeft sl;
+        MixData md({82, 29}, {0.7, 0.3}, 0.6, true, 10, 100);
+        SahaMixSolver sms;
 
-        //saha::Point ppp;
-        //ppp = saha::Calculate(82, 1, 2);
-
-        FindRoot findroot;
-        double xe = findroot(-746, log(double(82)), [&](double x) {return sl(md, md.V, x);}, 1e-7, md.T, md.V);
-
-        //printf("sl = %g xe = %g (%g)\n", sl(md, md.V, xe), ppp.Xe, xe);
-        printf("sl = %g xe = %g\n", sl(md, md.V, xe), xe);
+        printf("xe = %g\n", sms(md));
 
 		//CrashTest(0.6, -3, 6.01, 0.05, -1.51, 4.6, 0.05);
         //calculator(82, 0.6, -3, 6.01, 0.05, -5.51, 4.6, 0.05, "saha_Pb.m");
