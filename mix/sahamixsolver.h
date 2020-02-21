@@ -7,6 +7,7 @@ class SahaMixSolver
 {
 public:
     double operator()(const MixData &data);
+    double GetFullIonizationInfo(MixData &data);
 };
 
 #endif // SAHAMIXSOLVER_H

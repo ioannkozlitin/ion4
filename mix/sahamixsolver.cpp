@@ -16,3 +16,12 @@ double SahaMixSolver::operator()(const MixData &data)
 
     return xe;
 }
+
+double SahaMixSolver::GetFullIonizationInfo(MixData &data)
+{
+    double xe = operator ()(data);
+
+
+
+    return xe;
+}
