@@ -1,6 +1,10 @@
 #include "dfi.h"
+#include "../saha/src/mu_fi.h"
 
-double Dfi::operator()(const MixData &data, double vFree, double xe, int i, int j)
+#include <cmath>
+
+double Dfi::operator()(const MixData &data, double vFree, double xe, double p0, int i, int j)
 {
-    return 0;
+    const std::vector<double> &v = data.elements[i].v;
+    return p0 * (v[j] - v[j-1]);
 }
