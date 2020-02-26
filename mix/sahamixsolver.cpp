@@ -15,6 +15,9 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
     double V = data.GetFullV();
     double xe = findroot(-746, log(maxZ), [&](double x) {return sahaLeft(data, V, x);}, 1e-7, data.T, V);
 
+    double vIon = sahaLeft.GetVIon(data, V, xe);
+
+    //printf("(%g %g)", vIon, V);
     return {xe, V};
 }
 
@@ -27,15 +30,18 @@ double SahaMixSolver::GetFullIonizationInfo(MixData &data)
 
     for(int i = 0; i < bb.size(); i++)
     {
+        double biMax = bb[i][0];
+        for(int j = 1; j < bb[i].size(); j++) if(biMax < bb[i][j]) biMax = bb[i][j];
+
         double siBfull = 0;
         for(int j = 0; j < bb[i].size(); j++)
         {
-            siBfull += exp(bb[i][j]);
+            siBfull += exp(bb[i][j]-biMax);
         }
 
         for(int j = 0; j < bb[i].size(); j++)
         {
-            data.xx[i][j] = data.x[i] / siBfull * exp(bb[i][j]);
+            data.xx[i][j] = data.x[i] / siBfull * exp(bb[i][j]-biMax);
         }
     }
 

@@ -8,6 +8,7 @@ class SahaLeft
 {
 public:
     double operator()(const MixData &data, double vFree, double xe);
+    double GetVIon(const MixData &data, double vFree, double xe);
 
 private:
     B b;
