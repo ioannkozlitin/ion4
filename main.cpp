@@ -113,10 +113,20 @@ int main()
 {	
 	try
 	{
-        MixData md({82, 29}, {0.7, 0.3}, 0.6, true, 10, 100);
+        double meanA = 0.5 * 39.948 + 0.5 * 83.8;
+        double V = meanA * eRo / 1;
+
         SahaMixSolver sms;
 
-        printf("xe = %g\n", sms(md));
+        printf("xe0 = [");
+        for(double lgT = 2.0; lgT < 3.0005; lgT += 0.001)
+        {
+            MixData md({18, 36}, {0.5, 0.5}, 0.6, true, pow(10, lgT) / eFi, V);
+            double xe = sms.GetFullIonizationInfo(md);
+            printf("%g ", xe);
+        }
+        printf("];\n");
+        //printf("xe = %g\n", xe);
 
 		//CrashTest(0.6, -3, 6.01, 0.05, -1.51, 4.6, 0.05);
         //calculator(82, 0.6, -3, 6.01, 0.05, -5.51, 4.6, 0.05, "saha_Pb.m");

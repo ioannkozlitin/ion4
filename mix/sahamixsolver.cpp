@@ -21,7 +21,22 @@ double SahaMixSolver::GetFullIonizationInfo(MixData &data)
 {
     double xe = operator ()(data);
 
+    B b;
+    const std::vector<std::vector<double>> &bb = b(data, data.V, xe);
 
+    for(int i = 0; i < bb.size(); i++)
+    {
+        double siBfull = 0;
+        for(int j = 0; j < bb[i].size(); j++)
+        {
+            siBfull += exp(bb[i][j]);
+        }
+
+        for(int j = 0; j < bb[i].size(); j++)
+        {
+            data.xx[i][j] = data.x[i] / siBfull * exp(bb[i][j]);
+        }
+    }
 
     return xe;
 }
