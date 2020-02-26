@@ -12,7 +12,7 @@ double SahaMixSolver::operator()(const MixData &data)
     double maxZ = 0;
     for(int i = 0; i < data.x.size(); i++) maxZ += data.elements[i].Z * data.x[i];
 
-    double xe = findroot(-746, log(double(maxZ)), [&](double x) {return sahaLeft(data, data.V, x);}, 1e-7, data.T, data.V);
+    double xe = findroot(-746, log(maxZ), [&](double x) {return sahaLeft(data, data.V, x);}, 1e-7, data.T, data.V);
 
     return xe;
 }
