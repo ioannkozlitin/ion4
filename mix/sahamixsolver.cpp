@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-double SahaMixSolver::operator()(const MixData &data)
+SahaMixResult SahaMixSolver::operator()(const MixData &data)
 {
     SahaLeft sahaLeft;
     FindRoot findroot;
@@ -12,17 +12,18 @@ double SahaMixSolver::operator()(const MixData &data)
     double maxZ = 0;
     for(int i = 0; i < data.x.size(); i++) maxZ += data.elements[i].Z * data.x[i];
 
-    double xe = findroot(-746, log(maxZ), [&](double x) {return sahaLeft(data, data.V, x);}, 1e-7, data.T, data.V);
+    double V = data.GetFullV();
+    double xe = findroot(-746, log(maxZ), [&](double x) {return sahaLeft(data, V, x);}, 1e-7, data.T, V);
 
-    return xe;
+    return {xe, V};
 }
 
 double SahaMixSolver::GetFullIonizationInfo(MixData &data)
 {
-    double xe = operator ()(data);
+    SahaMixResult result = operator ()(data);
 
     B b;
-    const std::vector<std::vector<double>> &bb = b(data, data.V, xe);
+    const std::vector<std::vector<double>> &bb = b(data, result.Vfree, result.xe);
 
     for(int i = 0; i < bb.size(); i++)
     {
@@ -38,5 +39,5 @@ double SahaMixSolver::GetFullIonizationInfo(MixData &data)
         }
     }
 
-    return xe;
+    return result.xe;
 }

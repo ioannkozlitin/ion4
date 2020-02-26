@@ -13,9 +13,11 @@ public:
     std::vector<double> x;
     std::vector<std::vector<double>> xx;
     double T;
-    double V;
+
+    double GetFullV() const {return V;}
 
 private:
+    double V;
     void initZX(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0);
 };
 

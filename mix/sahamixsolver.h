@@ -3,10 +3,16 @@
 
 #include "mixdata.h"
 
+struct SahaMixResult
+{
+    double xe;
+    double Vfree;
+};
+
 class SahaMixSolver
 {
 public:
-    double operator()(const MixData &data);
+    SahaMixResult operator()(const MixData &data);
     double GetFullIonizationInfo(MixData &data);
 };
 
