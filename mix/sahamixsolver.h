@@ -17,7 +17,7 @@ public:
 
 private:
     double vFreeByXe(const MixData &data, double V, double xe);
-    SahaMixResult resultForVfree(const MixData &data, double vFree, double maxZ);
+    double xeByVfreeByXe(const MixData &data, double xe, double &vFree);
 };
 
 #endif // SAHAMIXSOLVER_H

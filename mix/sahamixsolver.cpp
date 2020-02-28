@@ -13,7 +13,10 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
     FindRoot findroot;
 
     double vFull = data.GetFullV();
-    double xe = findroot(-746, log(data.maxZ), [&](double x)
+    double xe;
+    double vFree;
+
+    xe = findroot(-746, log(data.maxZ), [&](double x)
     {
         double vFree = vFreeByXe(data,vFull,x);
 
@@ -25,17 +28,23 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
         return sahaLeft(data, vFree, x);
     }, 1e-7, data.T, vFull);
 
-    double vFree = vFreeByXe(data,vFull,xe);
+    xe = xeByVfreeByXe(data, xe, vFree);
+
+    double vError = fabs((sahaLeft.GetVIon(data, vFree, xe) + vFree)/vFull - 1);
+
+    if(vError > 1e-4)
+    {
+        xe = findroot(-746, log(data.maxZ), [&](double x)
+        {
+            return xeByVfreeByXe(data, x, vFree) - x;
+        }, 1e-7, data.T, vFull);
+        xe = xeByVfreeByXe(data, xe, vFree);
+    }
+
+    vError = fabs((sahaLeft.GetVIon(data, vFree, xe) + vFree)/vFull - 1);
+    //printf("(%g)", vError);
+
     //printf("(%g)", (sahaLeft.GetVIon(data, vFree, xe) + vFree - vFull)/vFull);
-
-    /*
-    double vFree = findroot(log(vFull) - 30, log(vFull), [&](double vfree) {return (vfree - resultForVfree(data,vfree,maxZ).Vfree) / vFull;},1e-12, data.T, vFull);
-    SahaMixResult result = resultForVfree(data, vFree, maxZ);
-
-    printf("(%g)", (vFree-result.Vfree)/vFull);
-    */
-
-    //printf("(%g)", (vFull - vIon) / vFull);
 
     return {xe, vFree};
 }
@@ -91,12 +100,18 @@ double SahaMixSolver::vFreeByXe(const MixData &data, double V, double xe)
     return vFree;
 }
 
-SahaMixResult SahaMixSolver::resultForVfree(const MixData &data, double vFree, double maxZ)
+double SahaMixSolver::xeByVfreeByXe(const MixData &data, double xe, double &vFree)
 {
     SahaLeft sahaLeft;
     FindRoot findroot;
 
-    double xe = findroot(-746, log(maxZ), [&](double x) {return sahaLeft(data, vFree, x);}, 1e-7, data.T, vFree);
-    double vIon = sahaLeft.GetVIon(data, vFree, xe);
-    return {xe, data.GetFullV()-vIon};
+    double vFull = data.GetFullV();
+    vFree = findroot(log(vFull) - 30, log(vFull), [&](double vfree)
+    {
+        return (sahaLeft.GetVIon(data, vfree, xe) + vfree) / vFull - 1;
+    }
+    ,1e-12, data.T, vFull);
+
+    return sahaLeft(data, vFree, xe) + xe;
 }
+
