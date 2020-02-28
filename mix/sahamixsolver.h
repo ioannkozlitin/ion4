@@ -14,6 +14,10 @@ class SahaMixSolver
 public:
     SahaMixResult operator()(const MixData &data);
     double GetFullIonizationInfo(MixData &data);
+
+private:
+    double vFreeByXe(const MixData &data, double V, double xe);
+    SahaMixResult resultForVfree(const MixData &data, double vFree, double maxZ);
 };
 
 #endif // SAHAMIXSOLVER_H

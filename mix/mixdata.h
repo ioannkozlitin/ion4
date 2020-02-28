@@ -13,6 +13,7 @@ public:
     std::vector<double> x;
     std::vector<std::vector<double>> xx;
     double T;
+    double maxZ;
 
     double GetFullV() const {return V;}
 
