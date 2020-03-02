@@ -116,10 +116,13 @@ int main()
         SahaMixSolver sms;
 
         printf("xe0 = [");
-        for(double lgT = 0.0; lgT < 5.0005; lgT += 0.01)
+
+        double lgT = 1;
+
+        for(double lgRho = -3; lgRho < 5.0005; lgRho += 0.01)
         {
             //MixData md({18, 36}, {0.5, 0.5}, 0.6, true, pow(10, lgT), 1);
-            MixData md({18, 36}, {0.5, 0.5}, 0.6, true, pow(10, lgT), 100);
+            MixData md({18, 36}, {0.5, 0.5}, 0.6, true, pow(10, lgT), pow(10, lgRho));
             double xe = sms.GetFullIonizationInfo(md);
             printf("%g ", xe);
         }

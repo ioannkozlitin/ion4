@@ -34,7 +34,8 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
 
     if(vError > 1e-4)
     {
-        xe = findroot(-746, log(data.maxZ), [&](double x)
+        xe = findroot(-746, log(data.maxZ), xe, [&](double x)
+        //xe = findroot(-746, log(data.maxZ), [&](double x)
         {
             return xeByVfreeByXe(data, x, vFree) - x;
         }, 1e-7, data.T, vFull);
