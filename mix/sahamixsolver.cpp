@@ -32,6 +32,7 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
 
     double vError = fabs((sahaLeft.GetVIon(data, vFree, xe) + vFree)/vFull - 1);
 
+    //if(false)
     if(vError > 1e-4)
     {
         xe = findroot(-746, log(data.maxZ), xe, [&](double x)
@@ -115,4 +116,3 @@ double SahaMixSolver::xeByVfreeByXe(const MixData &data, double xe, double &vFre
 
     return sahaLeft(data, vFree, xe) + xe;
 }
-

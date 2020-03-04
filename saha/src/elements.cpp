@@ -912,6 +912,11 @@ TElement::TElement(unsigned int z, double rCoeff, bool correctV0)
     v[z] = 0;
 }
 
+void TElement::softIon(double V)
+{
+    for(double &_v: v) _v = std::min(V, _v);
+}
+
 double elements::GetA(unsigned int z)
 {
     if(z < 1) z = 1;

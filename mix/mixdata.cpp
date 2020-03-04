@@ -50,4 +50,7 @@ void MixData::initZX(const std::vector<unsigned int> &Z, const std::vector<doubl
 
     maxZ = 0;
     for(int i = 0; i < x.size(); i++) maxZ += Z[i] * x[i];
+
+    //Soft Ions
+    //for(TElement &elem : elements) elem.softIon(V);
 }

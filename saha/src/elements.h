@@ -7,6 +7,8 @@ class TElement
 {
 public:
     TElement(unsigned int z, double rCoeff = 1, bool correctV0 = false);
+    void softIon(double V);
+
     unsigned int Z;//Заряд элемента
     double A;//Атомный вес в атомных единицах массы
     double ro;//Кристаллографичесая плотность
