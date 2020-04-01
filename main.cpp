@@ -234,7 +234,7 @@ int main()
 
         //calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.501, 4.6, 0.1, "Cu.m");
         //calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
-        calculatorMixRaizer({18, 36}, {0.5, 0.5}, 0.6, 0, 0, 0.1, 2, 3, 1, "Raizer.m");
+        calculatorMixRaizer({18, 36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "Raizer.m");
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
 	}
 	catch (std::exception& r)
