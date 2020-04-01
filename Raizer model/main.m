@@ -1,4 +1,4 @@
-clear all; %#ok<CLALL>
+clear all; close all; clc;
 
 Z = [18,36];
 x = [0.5,0.5]; 
@@ -15,7 +15,7 @@ rho = Rho_all(r);
 if( compare == 1 )
     Saha;
 else
-    T_range = 2.0:0.001:3;
+    T_range = [3 2];%:1:3;
 end
 N = length(T_range);
 xe_ans = zeros(1,N);
@@ -106,3 +106,5 @@ for n = 1:N
 end
 fclose(fid);
 end
+
+xe_ans
