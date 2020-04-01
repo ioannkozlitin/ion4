@@ -1,6 +1,5 @@
 #include "raizermixsolver.h"
 #include "../mix/findroot.h"
-
 #include <cmath>
 #include <limits>
 
@@ -8,28 +7,12 @@ double RaizerMixSolver::operator()(const MixData &data)
 {
     FindRoot findroot;
 
-    unsigned int maxZ = 0.0;
-    for (int j = 0; j < data.elements.size(); j++)
-    {
-        if (maxZ <= data.elements[j].Z)
-        {
-            maxZ = data.elements[j].Z;
-        }
-    }
-
-    double logA = -746;
-    double logB = log(maxZ); // log(data.maxZ);
-
     auto F = [&](double xe)
     {
         return getF(data, xe);
     };
 
-    double eps = 1e-6;
-    double T = data.T;
-    double V = data.GetFullV();
-
-    double xe = findroot(logA, logB, F, eps, T, V);
+    double xe = findroot(-746, log(data.maxZ), F, 1e-6, data.T, data.GetFullV());
 
     return xe;
 }
