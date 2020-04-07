@@ -1,8 +1,10 @@
 set(SOURCES_LIST ${SOURCES_LIST}
     ${CMAKE_CURRENT_LIST_DIR}/raizermixsolver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/raizer.cpp
      PARENT_SCOPE)
 
 set(HEADERS_LIST ${HEADERS_LIST}
-     ${CMAKE_CURRENT_LIST_DIR}/raizermixsolver.h
-     PARENT_SCOPE)
+    ${CMAKE_CURRENT_LIST_DIR}/raizermixsolver.h
+    ${CMAKE_CURRENT_LIST_DIR}/raizer.h
+    PARENT_SCOPE)
 
