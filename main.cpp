@@ -115,12 +115,21 @@ int main()
 	{
         SahaMixSolver sms;
 
-        printf("xe0 = [");
+        printf("Ar1617_1 = [");
         for(double lgT = 2.0; lgT < 3.0005; lgT += 0.001)
         {
             MixData md({18, 36}, {0.5, 0.5}, 0, false, pow(10, lgT), 1);
             double xe = sms.GetFullIonizationInfo(md);
-            printf("%g ", xe);
+            printf("%g %g %g\n", lgT, md.xx[0][16], md.xx[0][17]);
+        }
+        printf("];\n");
+
+        printf("Ar1617_01 = [");
+        for(double lgT = 2.0; lgT < 3.0005; lgT += 0.001)
+        {
+            MixData md({18, 36}, {0.5, 0.5}, 0, false, pow(10, lgT), 0.1);
+            double xe = sms.GetFullIonizationInfo(md);
+            printf("%g %g %g\n", lgT, md.xx[0][16], md.xx[0][17]);
         }
         printf("];\n");
 
