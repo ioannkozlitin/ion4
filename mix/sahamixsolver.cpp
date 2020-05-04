@@ -28,9 +28,12 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
         return sahaLeft(data, vFree, x);
     }, 1e-7, data.T, vFull);
 
-    xe = xeByVfreeByXe(data, xe, vFree);
+    //xe = xeByVfreeByXe(data, xe, vFree);
+    vFree = vFreeByXe(data,vFull,xe);
 
     double vError = fabs((sahaLeft.GetVIon(data, vFree, xe) + vFree)/vFull - 1);
+
+    SahaMixResult rezult1 = {xe, vFree};
 
     //if(false)
     if(vError > 1e-4)
@@ -41,14 +44,18 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
             return xeByVfreeByXe(data, x, vFree) - x;
         }, 1e-7, data.T, vFull);
         xe = xeByVfreeByXe(data, xe, vFree);
+
+        double vError2 = fabs((sahaLeft.GetVIon(data, vFree, xe) + vFree)/vFull - 1);
+
+        //printf("{%g %g %g}\n", data.GetFullV(), vError, vError2);
+        //if(vError2 < vError) return {xe, vFree};
+        return {xe, vFree};
+
+        //printf("{%g %g %g}\n", data.GetFullV(), vError, vError2);
+
+        //return {xe, vFree};
     }
-
-    vError = fabs((sahaLeft.GetVIon(data, vFree, xe) + vFree)/vFull - 1);
-    //printf("(%g)", vError);
-
-    //printf("(%g)", (sahaLeft.GetVIon(data, vFree, xe) + vFree - vFull)/vFull);
-
-    return {xe, vFree};
+    return rezult1;
 }
 
 double SahaMixSolver::GetFullIonizationInfo(MixData &data)
