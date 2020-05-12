@@ -20,9 +20,9 @@ public:
 
 namespace elements
 {
-    const TElement H(1);
+    /*const TElement H(1);
     const TElement Fe(26);
-    const TElement Cu(29);
+    const TElement Cu(29);*/
     double GetA(unsigned int z);
     double GetRo(unsigned int z);
 }

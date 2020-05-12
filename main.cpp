@@ -215,12 +215,16 @@ int main()
         }
         printf("];\n");*/
 
-        //calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.501, 4.6, 0.1, "Cu.m");
+        calculatorRho_eV(29, 0.6, 1.099, 1.1, 0.1, -2.01, -1.5, 0.1, "CuTest0.m");
         //calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
 
+        calculatorMix({29}, {1}, 0.6, 1.1, 1.1, 0.1, -2, -1.5, 0.1, "CuTest.m");
+
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
-        double rho = log10(1.29e-3);
-        calculatorMix({7,8}, {0.79, 0.21}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
+        //calculatorMix({7,8}, {0.79, 0.21}, 0.6, -6, 6, 0.1, 0, 2, 0.01, "air.m");
+
+        //double rho = log10(1.29e-3);
+        //calculatorMix({7,8}, {0.79, 0.21}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
         //calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
 	}
 	catch (std::exception& r)

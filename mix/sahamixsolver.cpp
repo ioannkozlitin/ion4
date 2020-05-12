@@ -55,6 +55,10 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
 
         //return {xe, vFree};
     }
+    else
+    {
+        printf("[core1: %g %g]\n", vError, xe);
+    }
     return rezult1;
 }
 
@@ -117,9 +121,15 @@ double SahaMixSolver::xeByVfreeByXe(const MixData &data, double xe, double &vFre
     double vFull = data.GetFullV();
     vFree = findroot(log(vFull) - 30, log(vFull), [&](double vfree)
     {
-        return (sahaLeft.GetVIon(data, vfree, xe) + vfree) / vFull - 1;
+        double result = (sahaLeft.GetVIon(data, vfree, xe) + vfree) / vFull - 1;
+        //printf("%22.16f %g\n", vfree, result);
+        return result;
     }
     ,1e-12, data.T, vFull);
 
-    return sahaLeft(data, vFree, xe) + xe;
+    double result = sahaLeft(data, vFree, xe);
+
+    printf("%22.18e %22.18e %22.18e\n", xe, result, vFree);
+
+    return result + xe;
 }

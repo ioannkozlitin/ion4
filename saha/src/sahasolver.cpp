@@ -274,6 +274,10 @@ SahaPoint SahaSolver::Calculate_TVae(double T, double V)
             vError = res2.vError;
         }
     }
+    else
+    {
+        printf("<core1: %g %g>\n", res1.vError, res1.xe);
+    }
 
     SahaPoint result;
     double E = e(T,vFree, xe);

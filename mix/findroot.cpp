@@ -38,6 +38,7 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
     {
         if((((fx0 <= 0) && (fx1 >= 0)) || ((fx0 >= 0) && (fx1 <= 0))) && (x1 > 0))
         {
+            //printf("[* %g %g - %g %g]", fx0, fx1, x0, x1);
             return core(log(x0), log(x1), fx0, fx1, F, eps, T, V);
         }
         else
@@ -52,7 +53,7 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
                 }
                 else
                 {
-                    double x2 = xroot(xprev, fprev, x0, fx0, x1, fx1);
+                    x2 = xroot(xprev, fprev, x0, fx0, x1, fx1);
 
                     if(std::isfinite(x2)) fx2 = F(x2);
                     else
@@ -60,6 +61,8 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
                         x2 = fx1 + x1;
                         fx2 = F(x2);
                     }
+
+                    //printf("[xroot %g %g]",x2,fx2);
                 }
 
                 xprev = x0;
@@ -70,6 +73,8 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
                 fx1 = fx2;
 
                 if(!std::isfinite(fx1)) break;
+
+                //printf("<%g %g>",x1,fx1);
 
                 watchDog++;
             }
