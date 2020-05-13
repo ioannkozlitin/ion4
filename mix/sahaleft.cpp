@@ -41,9 +41,12 @@ double SahaLeft::GetVIon(const MixData &data, double vFree, double xe)
             siBfull += exp(bb[i][j]-biMax);
         }
 
+        double logX0 = -log(siBfull)-biMax;
+
         for(int j = 0; j < bb[i].size(); j++)
         {
-            double xx_ij = data.x[i] / siBfull * exp(bb[i][j]-biMax);
+            //double xx_ij = data.x[i] / siBfull * exp(bb[i][j]-biMax);
+            double xx_ij = data.x[i] * exp(logX0 + bb[i][j]);
             vion += data.elements[i].v[j] * xx_ij;
         }
     }

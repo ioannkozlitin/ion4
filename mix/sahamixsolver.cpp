@@ -43,7 +43,13 @@ SahaMixResult SahaMixSolver::operator()(const MixData &data)
         {
             return xeByVfreeByXe(data, x, vFree) - x;
         }, 1e-7, data.T, vFull);
-        //printf("[end]");
+        //printf("[end]\n\n");
+
+        xeByVfreeByXe(data, 2.267727769274348404e+01, vFree);
+        //printf("!!!: %22.18e\n",sahaLeft(data, 2.848199525254015499e-02, 2.267727769274348404e+01));
+        //double vvf = 2.848199525254015499e-02;
+        //printf("[vion: %22.18e %g %g]\n", sahaLeft.GetVIon(data, vvf, 2.267727769274348404e+01), data.T, vFull);
+
         xe = xeByVfreeByXe(data, xe, vFree);
 
         double vError2 = fabs((sahaLeft.GetVIon(data, vFree, xe) + vFree)/vFull - 1);
@@ -123,14 +129,14 @@ double SahaMixSolver::xeByVfreeByXe(const MixData &data, double xe, double &vFre
     vFree = findroot(log(vFull) - 30, log(vFull), [&](double vfree)
     {
         double result = (sahaLeft.GetVIon(data, vfree, xe) + vfree) / vFull - 1;
-        //printf("%22.16f %g\n", vfree, result);
+        //printf("%22.18e %g\n", vfree, result);
         return result;
     }
     ,1e-12, data.T, vFull);
 
     double result = sahaLeft(data, vFree, xe);
 
-    //printf("%22.18e %22.18e %22.18e\n", xe, result, result+xe);
+    //printf("%22.18e %22.18e %22.18e (%22.18e) %e\n", xe, result, result+xe, vFree, (sahaLeft.GetVIon(data, vFree, xe) + vFree) / vFull - 1);
 
     return result + xe;
 }
