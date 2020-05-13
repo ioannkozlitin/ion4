@@ -38,8 +38,9 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
     {
         if((((fx0 <= 0) && (fx1 >= 0)) || ((fx0 >= 0) && (fx1 <= 0))) && (x1 > 0))
         {
-            //printf("[* %g %g - %g %g]", fx0, fx1, x0, x1);
-            return core(log(x0), log(x1), fx0, fx1, F, eps, T, V);
+            //printf("[* %g(%g) %g(%g)]", fx0, x0, fx1, x1);
+            if(x1 > x0) return core(log(x0), log(x1), fx0, fx1, F, eps, T, V);
+            else return core(log(x1), log(x0), fx1, fx0, F, eps, T, V);
         }
         else
         {
@@ -155,6 +156,8 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
         while ((b - a > eps) && (cc < 60) && (fabs(fa) > eps) && (fabs(fb) > eps));
         root = exp(0.5*(a + b));
     }
+
+    //printf("[cc:%d %g]",cc,b-a);
 
     double Froot = F(root);
 

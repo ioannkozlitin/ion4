@@ -276,7 +276,7 @@ SahaPoint SahaSolver::Calculate_TVae(double T, double V)
     }
     else
     {
-        printf("<core1: %g %g>\n", res1.vError, res1.xe);
+        //printf("<core1: %g %g>\n", res1.vError, res1.xe);
     }
 
     SahaPoint result;

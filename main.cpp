@@ -59,7 +59,7 @@ void CrashTest(double rCoeff, double lgVMin, double lgVMax, double lgVStep, doub
 
 void calculator(unsigned int Z, double rCoeff, double lgVMin, double lgVMax, double lgVStep, double lgTMin, double lgTMax, double lgTStep, std::string filename)
 {
-    const TElement elem(Z, rCoeff);
+    const TElement elem(Z, rCoeff, true);
 
     std::vector<double> lgTPhys;
     std::vector<double> lgVa;
@@ -215,10 +215,11 @@ int main()
         }
         printf("];\n");*/
 
-        calculatorRho_eV(29, 0.6, 1.099, 1.1, 0.1, -2.01, -1.5, 0.1, "CuTest0.m");
-        //calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
+        calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.51, 4.6, 0.1, "CuOld.m");
+        calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
 
-        calculatorMix({29}, {1}, 0.6, 1.1, 1.1, 0.1, -2, -1.5, 0.1, "CuTest.m");
+        //calculatorRho_eV(29, 0.6, 2.899, 2.9, 0.1, 1.59, 1.6, 0.1, "CuTest0.m");
+        //calculatorMix({29}, {1}, 0.6, 2.9, 2.9, 0.1, 1.6, 1.6, 0.1, "CuTest1.m");
 
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
         //calculatorMix({7,8}, {0.79, 0.21}, 0.6, -6, 6, 0.1, 0, 2, 0.01, "air.m");
