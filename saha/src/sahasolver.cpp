@@ -213,8 +213,11 @@ double SahaSolver::ffvFree(double xe, double T, double V, double &vFree)
     vFree = findroot(log(V) - 30, log(V), [&](double vfree) {return vFun(xe, T, V, vfree);}, 1e-12, T, V);
 
     //printf("<verror: %g>\n", vFun(xe, T, V, vFree));
+    double result = ffV(xe,T,V,vFree);
 
-    return ffV(xe,T,V,vFree);
+    //printf("%22.18e %22.18e %22.18e (%22.18e) %e\n", xe, result, result+xe, vFree, vFun(xe, T, V, vFree));
+
+    return result;
 }
 
 double SahaSolver::ff(double xe, double T, double V)
@@ -274,7 +277,7 @@ SahaPoint SahaSolver::Calculate_TVae(double T, double V)
     vError = res1.vError;
 
     if(res1.vError > thresholdEps)
-    {
+    {   
         res2 = res1;
         auxIteration = calcCore2(T, V, res2, 1e-7);
         if(res2.vError < res1.vError)

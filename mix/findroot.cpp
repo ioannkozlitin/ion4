@@ -107,8 +107,6 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
 
 double FindRoot::core(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
 {
-    double aa = a, bb = b;
-
     double c, cnew;
     double fc;
     double root = 0;
@@ -159,7 +157,7 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
         root = exp(0.5*(a + b));
     }
 
-    //printf("[cc:%d %g : %g %g : %g %g]",cc,b-a, F(exp(a)), F(exp(b)), aa, bb);
+    //printf("[cc:%d %g : %g %g : %g %g]",cc,b-a, F(exp(a)), F(exp(b)), 0.5*(a+b)-a, b-0.5*(a+b));
 
     double Froot = F(root);
 
