@@ -910,6 +910,15 @@ TElement::TElement(unsigned int z, double rCoeff, bool correctV0)
     }
 
     v[z] = 0;
+
+    //printf("z=%d;V=[\n", z);
+    //for(int i = 0; i <= z; i++) printf("%g ",v[i]);
+    //printf("];\n");
+}
+
+void TElement::softIon(double V)
+{
+    for(double &_v: v) _v = std::min(V, _v);
 }
 
 double elements::GetA(unsigned int z)

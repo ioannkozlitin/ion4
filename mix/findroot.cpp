@@ -1,17 +1,119 @@
 #include "findroot.h"
 #include <cmath>
+#include <limits>
 
 double FindRoot::operator ()(double logA, double logB, const std::function<double (double)> &F, double eps, double T, double V)
 {
-    double a = logA, b = logB, c, cnew;
-    double fa, fb, fc;
+    return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+}
+
+double FindRoot::operator ()(double logA, double logB, double x0, const std::function<double (double)> &F, double eps, double T, double V)
+{
+    double xprev = x0, fprev = 0;
+
+    if(x0 < 0)
+    {
+        return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+    }
+
+    double fx0 = F(x0);
+
+    if(fabs(fx0) < eps) return x0;
+
+    if(!std::isfinite(fx0))
+    {
+        return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+    }
+
+    double x1 = fx0 + x0;
+    double fx1 = F(x1);
+
+    if(!std::isfinite(fx1))
+    {
+        return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+    }
+
+    int watchDog = 0;
+    while(fabs(fx1) > eps)
+    {
+        if((((fx0 <= 0) && (fx1 >= 0)) || ((fx0 >= 0) && (fx1 <= 0))) && (x1 > 0))
+        {
+            //printf("[* %g(%g) %g(%g)]", fx0, x0, fx1, x1);
+            if(x1 > x0) return core(log(x0), log(x1), fx0, fx1, F, eps, T, V);
+            else return core(log(x1), log(x0), fx1, fx0, F, eps, T, V);
+        }
+        else
+        {
+            if((fabs(fx1) < fabs(fx0)) && (watchDog < 100))
+            {
+                double fx2, x2;
+                if(watchDog < 1)
+                {
+                    x2 = fx1 + x1;
+                    fx2 = F(x2);
+                }
+                else
+                {
+                    x2 = xroot(xprev, fprev, x0, fx0, x1, fx1);
+
+                    if(std::isfinite(x2)) fx2 = F(x2);
+                    else
+                    {
+                        x2 = fx1 + x1;
+                        fx2 = F(x2);
+                    }
+
+                    //printf("[xroot %g %g]",x2,fx2);
+                }
+
+                xprev = x0;
+                fprev = fx0;
+                x0 = x1;
+                fx0 = fx1;
+                x1 = x2;
+                fx1 = fx2;
+
+                if(!std::isfinite(fx1)) break;
+
+                //printf("<%g %g>",x1,fx1);
+
+                watchDog++;
+            }
+            else
+            {
+                double fa = F(exp(logA));
+                double fb = F(exp(logB));
+
+                if(((fa <= 0) && (fx0 >=0)) || ((fa >= 0) && (fx0 <=0)))
+                {
+                    return core(logA, log(x0), fa, fx0, F, eps, T, V);
+                }
+                else
+                {
+                    return core(log(x0), logB, fx0, fb, F, eps, T, V);
+                }
+            }
+        }
+    }
+
+    //printf("[%d]", watchDog);
+
+    if((fabs(fx1) < eps) && (std::isfinite(fx1))) return x1;
+    else
+    {
+        return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+    }
+}
+
+double FindRoot::core(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
+{
+    double c, cnew;
+    double fc;
     double root = 0;
 
     int cc = 0, cc2 = 0;
 
     cnew = b + 1;
-    fa = F(exp(a));
-    fb = F(exp(b));
     if(((fa >= 0) && (fb >= 0)) || ((fa <= 0) && (fb <= 0)))
     {
         if (fabs(fa) < fabs(fb)) root = exp(a);
@@ -55,7 +157,8 @@ double FindRoot::operator ()(double logA, double logB, const std::function<doubl
         root = exp(0.5*(a + b));
     }
 
-    //printf("<%d>",cc);
+    //printf("[cc:%d %g : %g %g : %g %g]",cc,b-a, F(exp(a)), F(exp(b)), 0.5*(a+b)-a, b-0.5*(a+b));
+
     double Froot = F(root);
 
     if(fabs(Froot) > fa) {root = exp(a);Froot = fa;};

@@ -60,6 +60,7 @@ private:
     double ffvFree(double xe, double T, double V, double &vFree);
     double ffV(double xe, double T, double V, double vFree);
     double vFun(double xe, double T, double V, double vFree);
+    double testVion(double xe, double T, double V, double vFree);
     double Vfree(double V, double xe);
     double vion();
 

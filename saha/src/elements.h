@@ -7,6 +7,8 @@ class TElement
 {
 public:
     TElement(unsigned int z, double rCoeff = 1, bool correctV0 = false);
+    void softIon(double V);
+
     unsigned int Z;//Заряд элемента
     double A;//Атомный вес в атомных единицах массы
     double ro;//Кристаллографичесая плотность
@@ -18,9 +20,9 @@ public:
 
 namespace elements
 {
-    const TElement H(1);
+    /*const TElement H(1);
     const TElement Fe(26);
-    const TElement Cu(29);
+    const TElement Cu(29);*/
     double GetA(unsigned int z);
     double GetRo(unsigned int z);
 }

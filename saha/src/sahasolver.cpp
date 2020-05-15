@@ -89,6 +89,7 @@ double SahaSolver::findroot(double logA, double logB, const std::function<double
         root = exp(0.5*(a + b));
     }
 
+    //printf("{cc:%d %g : %g %g : %g %g}",cc,b-a, F(exp(a)), F(exp(b)), logA, logB);
     //printf("<%d>",cc);
     double Froot = F(root);
 
@@ -210,7 +211,13 @@ int SahaSolver::calcCore2(double T, double V, calcCoreResult &result, double eps
 double SahaSolver::ffvFree(double xe, double T, double V, double &vFree)
 {
     vFree = findroot(log(V) - 30, log(V), [&](double vfree) {return vFun(xe, T, V, vfree);}, 1e-12, T, V);
-    return ffV(xe,T,V,vFree);
+
+    //printf("<verror: %g>\n", vFun(xe, T, V, vFree));
+    double result = ffV(xe,T,V,vFree);
+
+    //printf("%22.18e %22.18e %22.18e (%22.18e) %e\n", xe, result, result+xe, vFree, vFun(xe, T, V, vFree));
+
+    return result;
 }
 
 double SahaSolver::ff(double xe, double T, double V)
@@ -251,6 +258,12 @@ double SahaSolver::vFun(double xe, double T, double V, double vFree)
     return r / V - 1;
 }
 
+double SahaSolver::testVion(double xe, double T, double V, double vFree)
+{
+    formX(T, V, vFree, xe);
+    return vion();
+}
+
 SahaPoint SahaSolver::Calculate_TVae(double T, double V)
 {
     const double thresholdEps = 1e-4;
@@ -264,7 +277,7 @@ SahaPoint SahaSolver::Calculate_TVae(double T, double V)
     vError = res1.vError;
 
     if(res1.vError > thresholdEps)
-    {
+    {   
         res2 = res1;
         auxIteration = calcCore2(T, V, res2, 1e-7);
         if(res2.vError < res1.vError)
@@ -274,6 +287,14 @@ SahaPoint SahaSolver::Calculate_TVae(double T, double V)
             vError = res2.vError;
         }
     }
+    else
+    {
+        //printf("<core1: %g %g>\n", res1.vError, res1.xe);
+    }
+
+    //printf("xe:%22.18e vfree:%22.18e <ffv:%22.18e>\n",xe, vFree, ffV(xe,T,V,vFree));
+
+    //printf("{vion: %22.18e %g %g}\n", testVion(2.267727769274348404e+01, T, V, 2.848199525254015499e-02), T, V);
 
     SahaPoint result;
     double E = e(T,vFree, xe);
