@@ -38,7 +38,6 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
     {
         if((((fx0 <= 0) && (fx1 >= 0)) || ((fx0 >= 0) && (fx1 <= 0))) && (x1 > 0))
         {
-            //printf("[* %g(%g) %g(%g)]", fx0, x0, fx1, x1);
             if(x1 > x0) return core(log(x0), log(x1), fx0, fx1, F, eps, T, V);
             else return core(log(x1), log(x0), fx1, fx0, F, eps, T, V);
         }
@@ -62,8 +61,6 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
                         x2 = fx1 + x1;
                         fx2 = F(x2);
                     }
-
-                    //printf("[xroot %g %g]",x2,fx2);
                 }
 
                 xprev = x0;
@@ -74,8 +71,6 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
                 fx1 = fx2;
 
                 if(!std::isfinite(fx1)) break;
-
-                //printf("<%g %g>",x1,fx1);
 
                 watchDog++;
             }
@@ -95,8 +90,6 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
             }
         }
     }
-
-    //printf("[%d]", watchDog);
 
     if((fabs(fx1) < eps) && (std::isfinite(fx1))) return x1;
     else
@@ -156,8 +149,6 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
         while ((b - a > eps) && (cc < 60) && (fabs(fa) > eps) && (fabs(fb) > eps));
         root = exp(0.5*(a + b));
     }
-
-    //printf("[cc:%d %g : %g %g : %g %g]",cc,b-a, F(exp(a)), F(exp(b)), 0.5*(a+b)-a, b-0.5*(a+b));
 
     double Froot = F(root);
 
