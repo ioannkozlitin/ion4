@@ -1,8 +1,8 @@
 function [xe,xi,R,ZH,ZD] = raizer(Z,x, T,rho)
 global M_EL;
 
-rho = rho/11.2;
-T = T/27.26;
+rho = rho/11.2058783;
+T = T/27.2113962;
 
 el_num = length(Z);
 data(Z);
