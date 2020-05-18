@@ -1,6 +1,5 @@
 clear; clc; close all;
 
-
 Z = [18,36];
 X = [0.5,0.5]; 
 
