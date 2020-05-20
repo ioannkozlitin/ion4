@@ -1,0 +1,8 @@
+set(SOURCES_LIST ${SOURCES_LIST}
+    ${CMAKE_CURRENT_LIST_DIR}/raizermixsolver.cpp
+     PARENT_SCOPE)
+
+set(HEADERS_LIST ${HEADERS_LIST}
+     ${CMAKE_CURRENT_LIST_DIR}/raizermixsolver.h
+     PARENT_SCOPE)
+

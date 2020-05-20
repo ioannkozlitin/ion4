@@ -1,4 +1,4 @@
-clear all; %#ok<CLALL>
+clear all; close all; clc;
 
 Z = [18,36];
 x = [0.5,0.5]; 

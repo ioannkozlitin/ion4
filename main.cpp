@@ -6,6 +6,7 @@
 
 #include "mix/mixdata.h"
 #include "mix/sahamixsolver.h"
+#include "raizer/raizermixsolver.h"
 
 #include "saha/src/atom_ed.h"
 
@@ -196,6 +197,51 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
 
 }
 
+void calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<double> &x, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, std::string filename)
+{
+    RaizerMixSolver mixSolver;
+
+    std::vector<double> lgTPhys;
+    std::vector<double> lgVa;
+    std::vector<double> _lgRho;
+
+    std::vector<std::vector<double>> ionizationTable;
+
+    for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
+    {
+        lgTPhys.push_back(lgT);
+        std::cout << "[" << lgT << "]" << std::flush;
+        std::vector<double> ionizationLine;
+
+        bool fillFlag = _lgRho.empty();
+
+        for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
+        {
+            MixData md(Z, x, 0.0, false, pow(10, lgT), pow(10, lgRho));
+            ionizationLine.push_back(mixSolver(md));
+
+            if(fillFlag)
+            {
+                _lgRho.push_back(lgRho);
+                lgVa.push_back(log10(md.GetFullV()));
+            }
+        }
+
+        ionizationTable.push_back(ionizationLine);
+    }
+
+    std::fstream f(filename.c_str(), std::fstream::out);
+    f << std::scientific;
+
+    f << "Z=[";for(auto &z : Z) f << z << " ";f << "];" << std::endl;
+    f << "x=[";for(auto &_x : x) f << _x << " ";f << "];" << std::endl;
+
+    outputArray(f, "lgT", lgTPhys);
+    outputArray(f, "lgV", lgVa);
+    outputArray(f, "lgRho", _lgRho);
+    outputTable(f, "xe_Saha", ionizationTable);
+}
+
 int main()
 {	
 	try
@@ -204,6 +250,8 @@ int main()
 
         calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.51, 4.6, 0.1, "CuOld.m");
         calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
+
+        calculatorMixRaizer({29}, {1}, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuRaizer.m");
 
         //calculatorRho_eV(29, 0.6, 4.199, 4.2, 0.1, -2.51, -2.5, 0.1, "CuTest0.m");
         //calculatorMix({29}, {1}, 0.6, 4.2, 4.2, 0.1, -2.5, -2.5, 0.1, "CuTest1.m");

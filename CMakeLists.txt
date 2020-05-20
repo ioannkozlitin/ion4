@@ -32,6 +32,7 @@ endif()
 
 add_subdirectory(saha)
 add_subdirectory(mix)
+add_subdirectory(raizer)
 
 set(SOURCES_LIST ${SOURCES_LIST}
      ${CMAKE_CURRENT_LIST_DIR}/main.cpp)

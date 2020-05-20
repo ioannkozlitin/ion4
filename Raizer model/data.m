@@ -47,7 +47,7 @@ PHI  = zeros(Z_max,el_num);
 M_EL = zeros(1,el_num);
 for j = 1:el_num
     for n = 1:Z(j)
-        PHI(n,j) = phi0( Z(j),n )/27.26;
+        PHI(n,j) = phi0( Z(j),n )/27.2113962;
     end
     M_EL(j) = S1( Z(j) );
 end
