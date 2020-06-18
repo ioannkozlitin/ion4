@@ -1,0 +1,10 @@
+set(SOURCES_LIST ${SOURCES_LIST}
+    ${CMAKE_CURRENT_LIST_DIR}/mixdata.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/element.cpp
+    PARENT_SCOPE)
+
+set(HEADERS_LIST ${HEADERS_LIST}
+    ${CMAKE_CURRENT_LIST_DIR}/mixdata.h
+    ${CMAKE_CURRENT_LIST_DIR}/element.h
+    ${CMAKE_CURRENT_LIST_DIR}/atomed.h
+    PARENT_SCOPE)

@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # set project name ============================================================
-project(ion4)
+project(raizermixsolver)
 
 # set project options =========================================================
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -30,28 +30,14 @@ elseif(BUILD_TYPE MATCHES RELEASE)
     set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_LIST_DIR}/release)
 endif()
 
-add_subdirectory(saha)
-add_subdirectory(mix)
-add_subdirectory(raizer)
-
-set(SOURCES_LIST ${SOURCES_LIST}
-     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-     ${CMAKE_CURRENT_LIST_DIR}/output.cpp)
-
-set(HEADERS_LIST ${HEADERS_LIST}
-     ${CMAKE_CURRENT_LIST_DIR}/output.h)
+add_subdirectory(src)
 
 # get all needble libraries ===================================================
-
-# find_package(quadmath)
 
 set(INCLUDE_LIST
 )
 
 set(LIBRARY_LIST
-#    quadmath
-#     gsl
-#     gslcblas
 )
 
 # create & link target ========================================================
@@ -61,16 +47,12 @@ target_link_libraries(${TARGET_NAME} ${LIBRARY_LIST})
 
 # setup compilation definition ================================================
 target_compile_definitions(${TARGET_NAME} PUBLIC
-#    JMHALF2_LOG_EXCLUDE
     NIST_IONIZATION_POTENTIALS
 )
 
 # setup compilation options ===================================================
-set (COMMON_COMPILE_OPTIONS
-#          -std=gnu++11
-          -std=c++11
-#          -fopenmp
-#          -Wno-deprecated-declarations
+set(COMMON_COMPILE_OPTIONS
+    -std=c++11
 )
 
 if(BUILD_TYPE MATCHES DEBUG)
