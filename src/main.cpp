@@ -2,7 +2,7 @@
 #include "raizermixsolver/raizermixsolver.h"
 #include <fstream>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 void outputArray(std::ostream& os, const std::string dataName, const std::vector<double> &data)
 {
@@ -75,7 +75,7 @@ int main()
 {	
 	try
 	{
-        calculatorMixRaizer({29}, {1}, -6, 6, 0.1, -2.5, 4.6, 0.1, "result.m");
+        calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, "result.m");
 	}
 	catch (std::exception& r)
 	{

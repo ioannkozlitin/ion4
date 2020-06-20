@@ -21,7 +21,7 @@ set(LIBRARY_LIST)
 set(DEBUG_POSTFIX)
 
 # define target name ==========================================================
-set(TARGET_NAME ion4)
+set(TARGET_NAME raizermixsolver)
 
 # setup compilation output ====================================================
 if(BUILD_TYPE MATCHES DEBUG)
