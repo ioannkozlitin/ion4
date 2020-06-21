@@ -1,9 +1,10 @@
 #include "raizermixsolver.h"
 #include "findroot.h"
+#include "brent.h"
 #include <cmath>
 #include <limits>
 
-double RaizerMixSolver::operator()(const MixData &data)
+double RaizerMixSolver::operator()(const MixData &data, double eps, bool useBrent)
 {
     FindRoot findroot;
 
@@ -12,9 +13,14 @@ double RaizerMixSolver::operator()(const MixData &data)
         return getF(data, xe);
     };
 
-    double xe = findroot(-746, log(data.maxZ), F, 1e-6, data.T, data.V);
+    double xe = useBrent ? brent::zero(exp(-746), data.maxZ, eps, F) : findroot(-746, log(data.maxZ), F, eps, data.T, data.V);
 
     return xe;
+}
+
+int RaizerMixSolver::FunCallNum()
+{
+    return _funCallNum;
 }
 
 double RaizerMixSolver::getF(const MixData &data, double xe)
@@ -44,6 +50,8 @@ double RaizerMixSolver::getF(const MixData &data, double xe)
             printf("\nError: incorrect xe_part\n"); fflush(0);
         }
     }
+
+    _funCallNum++;
 
     return xe - sum;
 }

@@ -6,7 +6,8 @@
 class RaizerMixSolver
 {
 public:
-    double operator()(const MixData &data);
+    double operator()(const MixData &data, double eps, bool useBrent);
+    int FunCallNum();
 
 private:
     double getF(const MixData &data, double xe);
@@ -15,6 +16,8 @@ private:
     double getEps(double fi0, double fi1, double T);
     double getXePartOutside(double k, double gamma);
     double getXePartInside(double k, double gamma, double eps);
+
+    int _funCallNum = 0;
 };
 
 #endif // RAIZERMIXSOLVER_H
