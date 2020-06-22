@@ -92,7 +92,7 @@ int main()
 {	
 	try
 	{
-        std::vector<double> eps = {1e-6, 1e-10, 1e-16};
+        std::vector<double> eps = {1e-6, 1e-10, 1e-15};
 
         for (size_t i = 0; i < eps.size(); i++)
         {
