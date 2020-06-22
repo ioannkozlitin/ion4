@@ -108,8 +108,7 @@ double SahaMixSolver::xeByVfreeByXe(const MixData &data, double xe, double &vFre
     double vFull = data.GetFullV();
     vFree = findroot(log(vFull) - 30, log(vFull), [&](double vfree)
     {
-        double result = (sahaLeft.GetVIon(data, vfree, xe) + vfree) / vFull - 1;
-        return result;
+        return (sahaLeft.GetVIon(data, vfree, xe) + vfree) / vFull - 1;
     }
     , 1e-12, data.T, vFull);
 
