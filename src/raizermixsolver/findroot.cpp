@@ -4,8 +4,8 @@
 
 double FindRoot::operator ()(double logA, double logB, const std::function<double (double)> &F, double eps, double T, double V)
 {
-    //return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
-    return core2(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+    //return core0(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+    return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
 }
 
 double FindRoot::operator ()(double logA, double logB, double x0, const std::function<double (double)> &F, double eps, double T, double V)
@@ -99,7 +99,7 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
     }
 }
 
-double FindRoot::core(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
+double FindRoot::core0(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
 {
     double c, cnew;
     double fc;
@@ -170,7 +170,7 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
     else return root;
 }
 
-double FindRoot::core2(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
+double FindRoot::core(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
 {
     double c, cnew;
     double fc;
