@@ -13,7 +13,7 @@ double RaizerMixSolver::operator()(const MixData &data, double eps, bool useBren
         return getF(data, xe);
     };
 
-    double xe = useBrent ? brent::zero(exp(-746), data.maxZ, eps, F) : findroot(-746, log(data.maxZ), F, eps, data.T, data.V);
+    double xe = useBrent ? brent::zero(0, data.maxZ, eps, F) : findroot(-746, log(data.maxZ), F, eps, data.T, data.V);
 
     return xe;
 }
