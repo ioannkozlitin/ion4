@@ -251,7 +251,7 @@ int main()
         calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.51, 4.6, 0.1, "CuOld.m");
         calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
 
-        calculatorMixRaizer({29}, {1}, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuRaizer.m");
+        //calculatorMixRaizer({29}, {1}, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuRaizer.m");
 
         //calculatorRho_eV(29, 0.6, 4.199, 4.2, 0.1, -2.51, -2.5, 0.1, "CuTest0.m");
         //calculatorMix({29}, {1}, 0.6, 4.2, 4.2, 0.1, -2.5, -2.5, 0.1, "CuTest1.m");
