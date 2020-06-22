@@ -159,8 +159,8 @@ double FindRoot::core0(double a, double b, double fa, double fb, const std::func
         root = exp(c);Froot = fc;
     }
 
-    if(fabs(Froot) > fa) {root = exp(a);Froot = fa;};
-    if(fabs(Froot) > fb) {root = exp(b);Froot = fb;};
+    if(fabs(Froot) > fabs(fa)) {root = exp(a);Froot = fa;};
+    if(fabs(Froot) > fabs(fb)) {root = exp(b);Froot = fb;};
 
     double root2 = exp(chord(a,fa,b,fb));
     if(fabs(F(root2)) < fabs(Froot))
@@ -253,15 +253,21 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
         Froot = fc;
     }
 
-    if(fabs(Froot) > fa) {root = exp(a);Froot = fa;};
-    if(fabs(Froot) > fb) {root = exp(b);Froot = fb;};
+    if(fabs(Froot) > fabs(fa)) {root = exp(a);Froot = fa;};
+    if(fabs(Froot) > fabs(fb)) {root = exp(b);Froot = fb;};
 
-    /*double root2 = exp(chord(a,fa,b,fb));
-    if(fabs(F(root2)) < fabs(Froot))
+    /*
+    double root2 = exp(chord(a,fa,b,fb));
+
+    double F0 = F(root), F2 = F(root2);
+    if(fabs(F2) < fabs(F0))
     {
+        //printf("[%g %g]", root, root2);
         return root2;
     }
-    else return root;*/
+    else return root;
+    */
+
     return root;
 }
 
