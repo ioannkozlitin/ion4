@@ -228,6 +228,7 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
                 }
                 else
                 {
+                    //printf("<%d %d %g(%g) %g(%g) %g(%g)>", cc, cc2, a, fa, b, fb, c, fc);
                     size = 2;continue;
                 }
             }
