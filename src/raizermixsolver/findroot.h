@@ -12,6 +12,7 @@ public:
 private:
     double core0(double a, double b, double fa, double fb, const std::function<double(double)> &F, double eps, double T, double V);
     double core(double a, double b, double fa, double fb, const std::function<double(double)> &F, double eps, double T, double V);
+    double core(double a, double b, double fa, double fb, double c, const std::function<double(double)> &F, double eps, double T, double V);
     double xroot(double x1, double y1, double x2, double y2,double x3, double y3);
     double chord(double x1, double y1, double x2, double y2);
 };
