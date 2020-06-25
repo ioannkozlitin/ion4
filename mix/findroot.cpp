@@ -212,27 +212,30 @@ double FindRoot::core(double a, double b, double fa, double fb, double c, const 
 
         do
         {
-            x3 = xroot(x0,fx0,x1,fx1,x2,fx2);
-
-            if((x3 > a) && (x3 < b))
+            if(cc > 0)
             {
-                fx3 = F(exp(x3));
-                c = x3;fc = fx3;
+                x3 = xroot(x0,fx0,x1,fx1,x2,fx2);
 
-                x0 = x1;fx0 = fx1;
-                x1 = x2;fx1 = fx2;
-                x2 = x3;fx2 = fx3;
+                if((x3 > a) && (x3 < b))
+                {
+                    fx3 = F(exp(x3));
+                    c = x3;fc = fx3;
 
-                cc2++;
-            }
-            else
-            {
-                //printf("<%d %d %g(%g) %g(%g) %g(%g)>", cc, cc2, a, fa, b, fb, c, fc);
-                c = 0.5 * (a + b);
-                fc = F(exp(c));
-                x2 = c;fx2 = fc;
-                x0 = a;fx0 = fa;
-                x1 = b;fx1 = fb;
+                    x0 = x1;fx0 = fx1;
+                    x1 = x2;fx1 = fx2;
+                    x2 = x3;fx2 = fx3;
+
+                    cc2++;
+                }
+                else
+                {
+                    //printf("<%d %d %g(%g) %g(%g) %g(%g)>", cc, cc2, a, fa, b, fb, c, fc);
+                    c = 0.5 * (a + b);
+                    fc = F(exp(c));
+                    x2 = c;fx2 = fc;
+                    x0 = a;fx0 = fa;
+                    x1 = b;fx1 = fb;
+                }
             }
 
             if (((fa <= 0) && (fc >= 0)) || ((fa >= 0) && (fc <= 0)))
