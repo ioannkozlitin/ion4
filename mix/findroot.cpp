@@ -4,7 +4,6 @@
 
 double FindRoot::operator ()(double logA, double logB, const std::function<double (double)> &F, double eps, double T, double V)
 {
-    //return core0(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
     return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
 }
 
@@ -101,9 +100,19 @@ double FindRoot::operator ()(double logA, double logB, double x0, const std::fun
     }
 }
 
-double FindRoot::core0(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
+double FindRoot::core(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
 {
-    double c, cnew;
+    return core(a, b, fa, fb, 0.5*(a+b), F, eps, T, V);
+}
+
+double FindRoot::core(double a, double b, double fa, double fb, double c, const std::function<double (double)> &F, double eps, double T, double V)
+{
+    return basecore(a,b,fa,fb,c,F,eps,T,V);
+}
+
+double FindRoot::basecore(double a, double b, double fa, double fb, double c, const std::function<double (double)> &F, double eps, double T, double V)
+{
+    double cnew;
     double fc;
     double root = 0;
 
@@ -111,7 +120,7 @@ double FindRoot::core0(double a, double b, double fa, double fb, const std::func
 
     double Froot;
 
-    cnew = b + 1;
+    cnew = c;
     if(((fa >= 0) && (fb >= 0)) || ((fa <= 0) && (fb <= 0)))
     {
         if (fabs(fa) < fabs(fb))
@@ -139,7 +148,7 @@ double FindRoot::core0(double a, double b, double fa, double fb, const std::func
 
             fc = F(exp(c));
 
-            if(cc2 < 16) cnew = xroot(a,fa,b,fb,c,fc);
+            if(cc2 < 30) cnew = invxroot(a,fa,b,fb,c,fc);
 
             if (((fa <= 0) && (fc >= 0)) || ((fa >= 0) && (fc <= 0)))
             {
@@ -157,27 +166,17 @@ double FindRoot::core0(double a, double b, double fa, double fb, const std::func
 
             cc++;
         }
-        while ((b - a > eps) && (cc < 60) && (fabs(fa) > eps) && (fabs(fb) > eps));
+        while ((b - a > eps) && (cc < 90) && (fabs(fa) > eps) && (fabs(fb) > eps));
         root = exp(c);Froot = fc;
     }
 
     if(fabs(Froot) > fabs(fa)) {root = exp(a);Froot = fa;};
     if(fabs(Froot) > fabs(fb)) {root = exp(b);Froot = fb;};
 
-    double root2 = exp(chord(a,fa,b,fb));
-    if(fabs(F(root2)) < fabs(Froot))
-    {
-        return root2;
-    }
-    else return root;
+    return root;
 }
 
-double FindRoot::core(double a, double b, double fa, double fb, const std::function<double (double)> &F, double eps, double T, double V)
-{
-    return core(a, b, fa, fb, 0.5*(a+b), F, eps, T, V);
-}
-
-double FindRoot::core(double a, double b, double fa, double fb, double c, const std::function<double (double)> &F, double eps, double T, double V)
+double FindRoot::fastcore(double a, double b, double fa, double fb, double c, const std::function<double (double)> &F, double eps, double T, double V)
 {
     double fc;
     double root = 0;
@@ -214,9 +213,9 @@ double FindRoot::core(double a, double b, double fa, double fb, double c, const 
         {
             if(cc > 0)
             {
-                x3 = xroot(x0,fx0,x1,fx1,x2,fx2);
+                x3 = invxroot(x0,fx0,x1,fx1,x2,fx2);
 
-                if((x3 > a) && (x3 < b))
+                if((x3 > a) && (x3 < b) && (cc2 < 30))
                 {
                     fx3 = F(exp(x3));
                     c = x3;fc = fx3;
@@ -229,7 +228,6 @@ double FindRoot::core(double a, double b, double fa, double fb, double c, const 
                 }
                 else
                 {
-                    //printf("<%d %d %g(%g) %g(%g) %g(%g)>", cc, cc2, a, fa, b, fb, c, fc);
                     c = 0.5 * (a + b);
                     fc = F(exp(c));
                     x2 = c;fx2 = fc;
@@ -253,7 +251,7 @@ double FindRoot::core(double a, double b, double fa, double fb, double c, const 
             }
             cc++;
         }
-        while ((b - a > eps) && (cc < 60) && (fabs(fa) > eps) && (fabs(fb) > eps));
+        while ((b - a > eps) && (cc < 90) && (fabs(fa) > eps) && (fabs(fb) > eps));
         root = exp(c);
         Froot = fc;
     }
@@ -261,19 +259,15 @@ double FindRoot::core(double a, double b, double fa, double fb, double c, const 
     if(fabs(Froot) > fabs(fa)) {root = exp(a);Froot = fa;};
     if(fabs(Froot) > fabs(fb)) {root = exp(b);Froot = fb;};
 
-    /*
-    double root2 = exp(chord(a,fa,b,fb));
-
-    double F0 = F(root), F2 = F(root2);
-    if(fabs(F2) < fabs(F0))
-    {
-        //printf("[%g %g]", root, root2);
-        return root2;
-    }
-    else return root;
-    */
-
     return root;
+}
+
+double FindRoot::invxroot(double x1, double y1, double x2, double y2,double x3, double y3)
+{
+    double a=((x3-x2)/(y3-y2)-(x2-x1)/(y2-y1))/(y3-y1);
+    double b=a*(y3-y2)+(x3-x2)/(y3-y2);
+
+    return a*y3*y3-b*y3+x3;
 }
 
 double FindRoot::xroot(double x1, double y1, double x2, double y2,double x3, double y3)
