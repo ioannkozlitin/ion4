@@ -128,7 +128,8 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
 
             fc = F(c);
 
-            if(cc2 < 16) cnew = xroot(a,fa,b,fb,c,fc);
+            // if(cc2 < 16) cnew = xroot(a,fa,b,fb,c,fc);
+            if(cc2 < 16) cnew = invxroot(a,fa,b,fb,c,fc);
 
             if (((fa <= 0) && (fc >= 0)) || ((fa >= 0) && (fc <= 0)))
             {
@@ -174,6 +175,14 @@ double FindRoot::xroot(double x1, double y1, double x2, double y2,double x3, dou
 
     if(fabs(r1)<fabs(r2)) return r1+x3;
     else return r2+x3;
+}
+
+double FindRoot::invxroot(double x1, double y1, double x2, double y2, double x3, double y3)
+{
+    double a=((x3-x2)/(y3-y2)-(x2-x1)/(y2-y1))/(y3-y1);
+    double b=a*(y3-y2)+(x3-x2)/(y3-y2);
+
+    return a*y3*y3-b*y3+x3;
 }
 
 double FindRoot::chord(double x1, double y1, double x2, double y2)
