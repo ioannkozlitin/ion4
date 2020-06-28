@@ -2,9 +2,9 @@
 #include <cmath>
 #include <limits>
 
-double FindRoot::operator ()(double logA, double logB, const std::function<double (double)> &F, double eps, double T, double V)
+double FindRoot::operator ()(double a, double b, const std::function<double (double)> &F, double eps, double T, double V)
 {
-    return core(logA, logB, F(exp(logA)), F(exp(logB)), F, eps, T, V);
+    return core(a, b, F(a), F(b), F, eps, T, V);
 }
 
 double FindRoot::operator ()(double logA, double logB, double x0, const std::function<double (double)> &F, double eps, double T, double V)
@@ -109,8 +109,8 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
     cnew = b + 1;
     if(((fa >= 0) && (fb >= 0)) || ((fa <= 0) && (fb <= 0)))
     {
-        if (fabs(fa) < fabs(fb)) root = exp(a);
-        else root = exp(b);
+        if (fabs(fa) < fabs(fb)) root = a;
+        else root = b;
     }
     else
     {
@@ -126,7 +126,7 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
                 c = 0.5*(a + b);
             }
 
-            fc = F(exp(c));
+            fc = F(c);
 
             if(cc2 < 16) cnew = xroot(a,fa,b,fb,c,fc);
 
@@ -147,15 +147,15 @@ double FindRoot::core(double a, double b, double fa, double fb, const std::funct
             cc++;
         }
         while ((b - a > eps) && (cc < 60) && (fabs(fa) > eps) && (fabs(fb) > eps));
-        root = exp(0.5*(a + b));
+        root = 0.5*(a + b);
     }
 
     double Froot = F(root);
 
-    if(fabs(Froot) > fa) {root = exp(a);Froot = fa;};
-    if(fabs(Froot) > fb) {root = exp(b);Froot = fb;};
+    if(fabs(Froot) > fa) {root = a;Froot = fa;};
+    if(fabs(Froot) > fb) {root = b;Froot = fb;};
 
-    double root2 = exp(chord(a,fa,b,fb));
+    double root2 = chord(a,fa,b,fb);
     if(fabs(F(root2)) < fabs(Froot))
     {
         return root2;

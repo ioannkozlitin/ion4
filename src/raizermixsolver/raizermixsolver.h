@@ -6,7 +6,7 @@
 class RaizerMixSolver
 {
 public:
-    double operator()(const MixData &data, double eps, bool useBrent);
+    double operator()(const MixData &data, double eps, bool useBrent, bool useLog);
     int FunCallNum();
 
 private:

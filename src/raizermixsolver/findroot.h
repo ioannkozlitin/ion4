@@ -6,7 +6,7 @@
 class FindRoot
 {
 public:
-    double operator()(double logA, double logB, const std::function<double(double)> &F, double eps, double T, double V);
+    double operator()(double a, double b, const std::function<double(double)> &F, double eps, double T, double V);
     double operator()(double logA, double logB, double x0, const std::function<double(double)> &F, double eps, double T, double V);
 
 private:

@@ -4,18 +4,21 @@
 #include <cmath>
 #include <limits>
 
-double RaizerMixSolver::operator()(const MixData &data, double eps, bool useBrent)
+double RaizerMixSolver::operator()(const MixData &data, double eps, bool useBrent, bool useLog)
 {
     FindRoot findroot;
 
-    auto F = [&](double xe)
+    auto F = [&](double value)
     {
-        return getF(data, xe);
+        return useLog ? getF(data, exp(value)) : getF(data, value);
     };
 
-    double xe = useBrent ? brent::zero(exp(-746), data.maxZ, eps, F) : findroot(-746, log(data.maxZ), F, eps, data.T, data.V);
+    double A = useLog ? -746.0 : 0.0;
+    double B = useLog ? log(data.maxZ) : data.maxZ;
 
-    return xe;
+    double value = useBrent ? brent::zero(A, B, eps, F) : findroot(A, B, F, eps, data.T, data.V);
+
+    return useLog ? exp(value) : value;
 }
 
 int RaizerMixSolver::FunCallNum()

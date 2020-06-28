@@ -26,7 +26,7 @@ void outputTable(std::ostream& os, std::string tableName, const std::vector<std:
     os << "];" << std::endl;
 }
 
-int calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<double> &x, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double eps, bool useBrent, std::vector<std::vector<double>> &ionizationTable, std::string filename)
+int calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<double> &x, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double eps, bool useBrent, bool useLog, std::vector<std::vector<double>> &ionizationTable, std::string filename)
 {
     RaizerMixSolver mixSolver;
 
@@ -47,7 +47,7 @@ int calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<do
         for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
         {
             MixData md(Z, x, pow(10, lgT), pow(10, lgRho));
-            ionizationLine.push_back(mixSolver(md, eps, useBrent));
+            ionizationLine.push_back(mixSolver(md, eps, useBrent, useLog));
 
             if(fillFlag)
             {
@@ -92,19 +92,22 @@ int main()
 {	
 	try
 	{
-        std::vector<double> eps = {1e-6, 1e-10, 1e-16};
+        std::vector<double> eps = {1e-6};
 
         for (size_t i = 0; i < eps.size(); i++)
         {
-            std::vector<std::vector<double>> ourXe, brentXe;
+            std::vector<std::vector<double>> ourWithLogXe, brentWithLogXe, ourXe, brentXe;
 
-            int ourFunCallNum = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], false, ourXe, "result.m");
-            int brentFunCallNum = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], true, brentXe, "result_brent.m");
+            int ourWithLogCnt   = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], false, true , ourWithLogXe  , "result.m");
+            int brentWithLogCnt = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], true , true , brentWithLogXe, "result.m");
+            int ourCnt          = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], false, false, ourXe         , "result.m");
+            int brentCnt        = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], true , false, brentXe       , "result.m");
 
-            std::cout << "Eps: " << eps[i] << std::endl;
-            std::cout << "Our:   " << ourFunCallNum << std::endl;
-            std::cout << "Brent: " << brentFunCallNum << std::endl;
-            std::cout << "Max deviation: " << maxDeviation(ourXe, brentXe) << std::endl << std::endl;
+            std::cout << "Eps: "       << eps[i]                                                                 << std::endl;
+            std::cout << "Our Log  : " << ourWithLogCnt   << " | "                                               << std::endl;
+            std::cout << "Brent Log: " << brentWithLogCnt << " | " << maxDeviation(ourWithLogXe, brentWithLogXe) << std::endl;
+            std::cout << "Our      : " << ourCnt          << " | " << maxDeviation(ourWithLogXe, ourXe)          << std::endl;
+            std::cout << "Brent    : " << brentCnt        << " | " << maxDeviation(ourWithLogXe, brentXe)        << std::endl;
         }
 
 	}
