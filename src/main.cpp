@@ -26,7 +26,7 @@ void outputTable(std::ostream& os, std::string tableName, const std::vector<std:
     os << "];" << std::endl;
 }
 
-int calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<double> &x, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double eps, bool useBrent, bool useLog, std::vector<std::vector<double>> &ionizationTable, std::string filename)
+double calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<double> &x, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double eps, bool useBrent, bool useLog, std::vector<std::vector<double>> &ionizationTable, std::string filename)
 {
     RaizerMixSolver mixSolver;
 
@@ -35,6 +35,8 @@ int calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<do
     std::vector<double> _lgRho;
 
     ionizationTable.clear();
+
+    size_t calcNum = 0;
 
     for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
     {
@@ -48,6 +50,8 @@ int calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<do
         {
             MixData md(Z, x, pow(10, lgT), pow(10, lgRho));
             ionizationLine.push_back(mixSolver(md, eps, useBrent, useLog));
+
+            calcNum++;
 
             if(fillFlag)
             {
@@ -70,7 +74,7 @@ int calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<do
     outputArray(f, "lgRho", _lgRho);
     outputTable(f, "xe", ionizationTable);
 
-    return mixSolver.FunCallNum();
+    return mixSolver.FunCallNum() / double(calcNum);
 }
 
 double maxDeviation(const std::vector<std::vector<double>> &t1, const std::vector<std::vector<double>> &t2)
@@ -98,16 +102,16 @@ int main()
         {
             std::vector<std::vector<double>> ourWithLogXe, brentWithLogXe, ourXe, brentXe;
 
-            int ourWithLogCnt   = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], false, true , ourWithLogXe  , "result.m");
-            int brentWithLogCnt = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], true , true , brentWithLogXe, "result.m");
-            int ourCnt          = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], false, false, ourXe         , "result.m");
-            int brentCnt        = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], true , false, brentXe       , "result.m");
+            double ourWithLogCnt   = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], false, true , ourWithLogXe  , "result.m");
+            double brentWithLogCnt = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], true , true , brentWithLogXe, "result.m");
+            double ourCnt          = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], false, false, ourXe         , "result.m");
+            double brentCnt        = calculatorMixRaizer({7, 8, 18}, {0.78, 0.21, 0.01}, -6, 6, 0.1, -2.5, 4.6, 0.1, eps[i], true , false, brentXe       , "result.m");
 
-            std::cout << "Eps: "       << eps[i]                                                                 << std::endl;
-            std::cout << "Our Log  : " << ourWithLogCnt   << " | "                                               << std::endl;
-            std::cout << "Brent Log: " << brentWithLogCnt << " | " << maxDeviation(ourWithLogXe, brentWithLogXe) << std::endl;
-            std::cout << "Our      : " << ourCnt          << " | " << maxDeviation(ourWithLogXe, ourXe)          << std::endl;
-            std::cout << "Brent    : " << brentCnt        << " | " << maxDeviation(ourWithLogXe, brentXe)        << std::endl;
+            printf("Eps: %g\n"               , eps[i]                                                     );
+            printf("Our Log  : %05.2f\n"     , ourWithLogCnt                                              );
+            printf("Brent Log: %05.2f | %g\n", brentWithLogCnt, maxDeviation(ourWithLogXe, brentWithLogXe));
+            printf("Our      : %05.2f | %g\n", ourCnt         , maxDeviation(ourWithLogXe, ourXe)         );
+            printf("Brent    : %05.2f | %g\n", brentCnt       , maxDeviation(ourWithLogXe, brentXe)       );
         }
 
 	}
