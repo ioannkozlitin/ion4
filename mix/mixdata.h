@@ -16,6 +16,11 @@ public:
     double maxZ;
 
     double GetFullV() const {return V;}
+    double xe();
+    double vfree();
+    double p();
+    double e();
+    double s();
 
 private:
     double V;

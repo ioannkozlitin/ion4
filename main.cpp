@@ -152,7 +152,11 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
         for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
         {
             MixData md(Z, x, rCoeff, true, pow(10, lgT), pow(10, lgRho));
-            ionizationLine.push_back(mixSolver.GetFullIonizationInfo(md));
+
+            double xe = mixSolver.GetFullIonizationInfo(md);
+            ionizationLine.push_back(xe);
+
+            //std::cout << "{" << xe - md.xe() << "}";
 
             for(int i = 0; i < Z.size(); i++)
             {
@@ -249,13 +253,13 @@ int main()
 	{
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -1.159046, -1.159046, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
 
-        double t0 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.51, 4.6, 0.1, "CuOld.m");
-        double t1 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
-        double t2 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        //double t0 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        //calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.51, 4.6, 0.1, "CuOld.m");
+        //double t1 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        //calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
+        //double t2 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
-        printf("\ndt1 = %g dt2 = %g\n", (t1-t0)*1000, (t2-t1)*1000);
+        //printf("\ndt1 = %g dt2 = %g\n", (t1-t0)*1000, (t2-t1)*1000);
 
         //calculatorMixRaizer({29}, {1}, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuRaizer.m");
 
@@ -265,9 +269,9 @@ int main()
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
         //calculatorMix({7,8}, {0.79, 0.21}, 0.6, -6, 6, 0.1, 0, 2, 0.01, "air.m");
 
-        //double rho = log10(1.29e-3);
+        double rho = log10(1.29e-3);
         //calculatorMix({7,8}, {0.79, 0.21}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
-        //calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
+        calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
 	}
 	catch (std::exception& r)
 	{
