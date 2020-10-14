@@ -6,7 +6,7 @@
 class TElement
 {
 public:
-    TElement(unsigned int z, double rCoeff = 1, bool correctV0 = false);
+    TElement(unsigned int z, double rCoeff = 1, bool correctV0 = false, bool newVolumes = true);
     void softIon(double V);
 
     unsigned int Z;//Заряд элемента

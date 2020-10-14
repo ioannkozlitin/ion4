@@ -4,7 +4,7 @@
 #include "../saha/src/atom_ed.h"
 #include "../saha/src/mu_fi.h"
 
-MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, double T, double V, bool TVaeFlag)
+MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double T, double V, bool TVaeFlag)
 {
     if(TVaeFlag)
     {
@@ -17,10 +17,10 @@ MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &
         return;
     }
 
-    initZX(Z, x, rCoeff, correctV0);
+    initZX(Z, x, rCoeff, correctV0, newVolumes);
 }
 
-MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, double TeV, double Rho)
+MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double TeV, double Rho)
 {
     double meanA = 0;
     for(int i = 0; i < Z.size(); i++)
@@ -31,7 +31,7 @@ MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &
     this->V = meanA * eRo / Rho;
     this->T = TeV / eFi;
 
-    initZX(Z, x, rCoeff, correctV0);
+    initZX(Z, x, rCoeff, correctV0, newVolumes);
 }
 
 double MixData::xe()
@@ -109,7 +109,7 @@ double MixData::s()
     return Si + Se;
 }
 
-void MixData::initZX(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0)
+void MixData::initZX(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes)
 {
     if(x.size() != Z.size())
     {
@@ -119,7 +119,7 @@ void MixData::initZX(const std::vector<unsigned int> &Z, const std::vector<doubl
 
     for(auto &zi : Z)
     {
-        elements.push_back(TElement(zi, rCoeff, correctV0));
+        elements.push_back(TElement(zi, rCoeff, correctV0, newVolumes));
         xx.push_back(std::vector<double>(zi+1));
     }
 
