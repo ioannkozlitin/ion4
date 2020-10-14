@@ -177,6 +177,7 @@ double FindRoot::basecore(double a, double b, double fa, double fb, double c, co
             cc++;
         }
         while ((b - a > eps) && (cc < 90) && (fabs(fa) > eps) && (fabs(fb) > eps));
+        //while ((b - a > eps) && (cc < 90) && (fabs(fc) > eps));
         root = c;Froot = fc;
     }
 
