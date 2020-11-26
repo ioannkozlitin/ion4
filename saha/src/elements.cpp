@@ -910,9 +910,10 @@ TElement::TElement(unsigned int z, double rCoeff, bool correctV0, bool newVolume
 
         if(newVolumes)
         {
+            const double v0c = 21.3;
             for(unsigned int i = 1; i < z; i++)
             {
-                v[i] = (v0 - i / (z - 1.0) * (v0 - 21.3)) * pow(1 - i / double(z), 3.0);
+                v[i] = (v0 - i / (z - 1.0) * (v0 - v0c)) * pow(1 - i / double(z), 3.0);
             }
         }
     }
