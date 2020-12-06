@@ -10,7 +10,7 @@ namespace saha
    // Точка расчета по модели Саха
    struct Point
    {
-      unsigned int Z;  // атомный номер
+      double Z;  // атомный номер
       double T;      // температура, а. е.
       double V;      // объём атомной ячейки, а. е.
       double P;      // давление, а. е.
@@ -52,6 +52,8 @@ namespace saha
    ///
    /// В случае ошибки выбрасывается исключение std::exception.
    Point Calculate(unsigned int i_Z, double i_lgT, double i_lgV, double ionRadiusCoeff = 0);
+   Point Calculate(const std::vector<unsigned int> &Z, const std::vector<double> &x, double i_lgT, double i_lgV, double ionRadiusCoeff = 0);
+
    void SetExternalAtomicWeight(double A);
    void SetExternalRho(double rho);
    double GetA(unsigned int i_Z);

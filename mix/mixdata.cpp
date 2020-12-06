@@ -22,16 +22,22 @@ MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &
 
 MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double TeV, double Rho)
 {
-    double meanA = 0;
-    for(int i = 0; i < Z.size(); i++)
-    {
-        meanA += x[i] * elements::GetA(Z[i]);
-    }
+    initZX(Z, x, rCoeff, correctV0, newVolumes);
 
     this->V = meanA * eRo / Rho;
     this->T = TeV / eFi;
+}
 
-    initZX(Z, x, rCoeff, correctV0, newVolumes);
+double MixData::SetTeVRho(double TeV, double Rho)
+{
+    V = meanA * eRo / Rho;
+    T = TeV / eFi;
+}
+
+double MixData::SetTVae(double T, double V)
+{
+    this->T = T;
+    this->V = V;
 }
 
 double MixData::xe()
@@ -109,6 +115,67 @@ double MixData::s()
     return Si + Se;
 }
 
+double MixData::getZd(double xe)
+{
+    double z2 = xe;
+    double allIonsX = 0;
+
+    for(int i = 0; i < elements.size(); i++)
+    {
+        for(int j = 1; j <= elements[i].Z; j++)
+        {
+            z2 += xx[i][j] * j * j;
+            allIonsX += xx[i][j];
+        }
+    }
+
+    double z2final = (allIonsX > 1e-16) ? z2 / allIonsX : 1;
+
+    return sqrt(std::max(z2final, 0.0));
+}
+
+double MixData::getRd(double V)
+{
+    double R3 = 3 * V / (4 * M_PI);
+    double allIonsX = 0;
+
+    for(int i = 0; i < elements.size(); i++)
+    {
+        for(int j = 1; j <= elements[i].Z; j++)
+        {
+            allIonsX += xx[i][j];
+        }
+    }
+
+    return pow(std::max(R3 / allIonsX, 0.0), 1 / 3.0);
+}
+
+SahaPoint MixData::GetSahaPoint()
+{
+    SahaPoint result;
+
+    double vFree = vfree();
+
+    result.Z = maxZ;
+    result.T = T;
+    result.V = V;
+    result.E = e();
+    result.P = p();
+    result.S = s();
+    result.Xe = xe();
+    result.M = mu(T, vFree, result.Xe);
+    result.F = result.E - T * result.S;
+    result.vFactor = vFree / V;
+    result.IMu = I05mu_d_t(T,vFree,result.Xe);
+    result.K = pow(result.IMu,1.5);
+    result.vError = 0;
+    result.auxIt = 0;
+    result.zd = getZd(result.Xe);
+    result.rd = getRd(V);
+
+    return result;
+}
+
 void MixData::initZX(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes)
 {
     if(x.size() != Z.size())
@@ -125,8 +192,8 @@ void MixData::initZX(const std::vector<unsigned int> &Z, const std::vector<doubl
 
     this->x = x;
 
-    maxZ = 0;
-    for(int i = 0; i < x.size(); i++) maxZ += Z[i] * x[i];
+    maxZ = 0;for(int i = 0; i < x.size(); i++) maxZ += Z[i] * x[i];
+    meanA = 0;for(int i = 0; i < Z.size(); i++) meanA += x[i] * elements::GetA(Z[i]);
 
     //Soft Ions
     //for(TElement &elem : elements) elem.softIon(V);

@@ -137,6 +137,8 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     xxTable.resize(Z.size());
     for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
 
+    MixData md(Z, x, rCoeff, true, true, 1, 1);
+
     for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
     {
         lgTPhys.push_back(lgT);
@@ -151,7 +153,8 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
 
         for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
         {
-            MixData md(Z, x, rCoeff, true, true, pow(10, lgT), pow(10, lgRho));
+            //MixData md(Z, x, rCoeff, true, true, pow(10, lgT), pow(10, lgRho));
+            md.SetTeVRho(pow(10, lgT), pow(10, lgRho));
 
             double xe = mixSolver.GetFullIonizationInfo(md);
             ionizationLine.push_back(xe);

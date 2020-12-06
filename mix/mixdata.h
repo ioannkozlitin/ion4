@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../saha/src/elements.h"
+#include "../saha/src/sahasolver.h"
 
 class MixData
 {
@@ -14,13 +15,20 @@ public:
     std::vector<std::vector<double>> xx;
     double T;
     double maxZ;
+    double meanA;
 
+    double SetTeVRho(double TeV, double Rho);
+    double SetTVae(double T, double V);
     double GetFullV() const {return V;}
     double xe();
     double vfree();
     double p();
     double e();
     double s();
+    double getZd(double xe);
+    double getRd(double V);
+
+    SahaPoint GetSahaPoint();
 
 private:
     double V;

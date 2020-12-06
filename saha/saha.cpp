@@ -1,6 +1,7 @@
 ﻿#include "saha.h"
 #include "src/sahasolver.h"
 #include "src/atom_ed.h"
+#include "../mix/sahamixsolver.h".h"
 #include <cmath>
 #include <sstream>
 #include <memory>
@@ -18,9 +19,30 @@ namespace saha
 	{
 		const unsigned int c_maxZ = 103;
         double _ionRadiusCoeff = 0; //Нулевое значение - режим совместимости со старой Сахой
+        std::vector<unsigned int> mixZ;
+        std::vector<double> mix_x;
 	
         std::shared_ptr<TElement> elem, elem0;
         std::shared_ptr<SahaSolver> solver, solver0;
+
+        std::shared_ptr<MixData> mixData;
+        SahaMixSolver mixSolver;
+
+        SahaPoint calculate(const std::vector<unsigned int> &Z, const std::vector<double> &x, double i_lgT, double i_lgV, double ionRadiusCoeff)
+        {
+            if((!mixData) || (Z != mixZ) || (x != mix_x) || (ionRadiusCoeff != _ionRadiusCoeff))
+            {
+                mixData.reset(new MixData(Z, x, ionRadiusCoeff, true, false, pow(10.0, i_lgT), pow(10.0, i_lgV), true));
+                mixZ = Z;mix_x = x;
+            }
+            else
+            {
+                mixData->SetTVae(pow(10.0, i_lgT), pow(10.0, i_lgV));
+            }
+
+            mixSolver.GetFullIonizationInfo(*mixData);
+            return mixData->GetSahaPoint();
+        }
 	   
         SahaPoint calculate(unsigned int i_Z, double i_lgT, double i_lgV, double ionRadiusCoeff)
 		{
@@ -113,11 +135,8 @@ namespace saha
       const double k_t_right = log10(sp_t_right.K);
 
       dLgPdLgT = (log10(sp_t_right.P) - log10(sp_t_left.P)) / 2.0 / dArg;
-
-      {
-        dLgKdLgV = (k_v_right - k_v_left) / 2.0 / dArg;
-        dLgKdLgT = (k_t_right - k_t_left) / 2.0 / dArg;
-      }
+      dLgKdLgV = (k_v_right - k_v_left) / 2.0 / dArg;
+      dLgKdLgT = (k_t_right - k_t_left) / 2.0 / dArg;
 
       const double V = pow(10.0, i_lgV);
       const double T = pow(10.0, i_lgT);
@@ -219,6 +238,58 @@ namespace saha
         }
 
         fclose(f);
+    }
+
+    Point Calculate(const std::vector<unsigned int> &Z, const std::vector<double> &x, double i_lgT, double i_lgV, double ionRadiusCoeff)
+    {
+        const SahaPoint sp = calculate(Z, x, i_lgT, i_lgV, ionRadiusCoeff);
+        const double dArg = 0.01;
+
+        double dLgKdLgV = 0;
+        double dLgKdLgT = 0;
+        double dLgPdLgT = 0;
+
+        const SahaPoint sp_v_left = calculate(Z, x, i_lgT, i_lgV - dArg, ionRadiusCoeff);
+        const SahaPoint sp_v_right = calculate(Z, x, i_lgT, i_lgV + dArg, ionRadiusCoeff);
+
+        //Костыли для борьбы с переполнением...
+        const double k_v_left = log10(std::max(sp_v_left.K, 1e-308));
+        const double k_v_right = log10(std::max(sp_v_right.K, 1e-308));
+
+        const SahaPoint sp_t_left = calculate(Z, x, i_lgT - dArg, i_lgV, ionRadiusCoeff);
+        const SahaPoint sp_t_right = calculate(Z, x, i_lgT + dArg, i_lgV, ionRadiusCoeff);
+
+        const double k_t_left = log10(sp_t_left.K);
+        const double k_t_right = log10(sp_t_right.K);
+
+        dLgPdLgT = (log10(sp_t_right.P) - log10(sp_t_left.P)) / 2.0 / dArg;
+        dLgKdLgV = (k_v_right - k_v_left) / 2.0 / dArg;
+        dLgKdLgT = (k_t_right - k_t_left) / 2.0 / dArg;
+
+        const double V = pow(10.0, i_lgV);
+        const double T = pow(10.0, i_lgT);
+
+        Point pt;
+        pt.Z = sp.Z;
+        pt.T = T;
+        pt.V = V;
+        pt.P = sp.P;
+        pt.DPQuip = 0;
+        pt.E = sp.E;
+        pt.S = sp.S;
+        pt.M = sp.M;
+        pt.lgKappa = log10(sp.K);
+        pt.lgIMu = log10(sp.IMu);
+        pt.F = sp.E - sp.S * T;
+        pt.dLgKdLgV = dLgKdLgV;
+        pt.dLgKdLgT = dLgKdLgT;
+        pt.dLgPdLgT = dLgPdLgT;
+        pt.Xe = sp.Xe;
+        pt.vFactor = sp.vFactor;
+        pt.x = sp.x;
+        pt.zd = sp.zd;
+        pt.rd = sp.rd;
+        return pt;
     }
 
 } // namespace saha
