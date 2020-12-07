@@ -292,4 +292,24 @@ namespace saha
         return pt;
     }
 
+    double GetA(const std::vector<unsigned int> &Z, const std::vector<double> &x)
+    {
+        double A = 0;
+        for(int i = 0; i < Z.size(); i++)
+        {
+            A += elements::GetA(Z[i]) * x[i];
+        }
+        return A;
+    }
+
+    double GetRo(const std::vector<unsigned int> &Z, const std::vector<double> &x)
+    {
+        double Ro = 0;
+        for(int i = 0; i < Z.size(); i++)
+        {
+            Ro += elements::GetRo(Z[i]) * x[i];
+        }
+        return Ro;
+    }
+
 } // namespace saha

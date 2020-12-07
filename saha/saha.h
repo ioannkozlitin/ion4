@@ -58,6 +58,8 @@ namespace saha
    void SetExternalRho(double rho);
    double GetA(unsigned int i_Z);
    double GetRo(unsigned int i_Z);
+   double GetA(const std::vector<unsigned int> &Z, const std::vector<double> &x);
+   double GetRo(const std::vector<unsigned int> &Z, const std::vector<double> &x);
    void SetTeta(double value);
    void SetCorrectV0(double value);
    void TestIonVolumes();
