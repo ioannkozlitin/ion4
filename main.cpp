@@ -39,6 +39,21 @@ void outputTable(std::ostream& os, std::string tableName, const std::vector<std:
     os << "];" << std::endl;
 }
 
+void outputTable(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> table, std::function<double(const SahaPoint&)> accessor)
+{
+    os << tableName << " = [" << std::endl;
+    for (size_t i = 0; i < table.size(); ++i)
+    {
+        const std::vector<SahaPoint>& line = table[i];
+        for (size_t j = 0; j < line.size(); ++j)
+        {
+            os << accessor(line[j]) << " ";
+        }
+        os << std::endl;
+    }
+    os << "];" << std::endl;
+}
+
 void CrashTest(double rCoeff, double lgVMin, double lgVMax, double lgVStep, double lgTMin, double lgTMax, double lgTStep)
 {
 	for (int Z = 1; Z <= 103; Z++)
@@ -131,11 +146,11 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     std::vector<double> lgVa;
     std::vector<double> _lgRho;
 
-    std::vector<std::vector<double>> ionizationTable;
-    std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
+    std::vector<std::vector<SahaPoint>> fullTable;
+    //std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
 
-    xxTable.resize(Z.size());
-    for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
+    //xxTable.resize(Z.size());
+    //for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
 
     MixData md(Z, x, rCoeff, true, true, 1, 1);
 
@@ -143,11 +158,11 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     {
         lgTPhys.push_back(lgT);
         std::cout << "[" << lgT << "]" << std::flush;
-        std::vector<double> ionizationLine;
-        std::vector<std::vector<std::vector<double>>> xxLines;
+        std::vector<SahaPoint> fullLine;
+        //std::vector<std::vector<std::vector<double>>> xxLines;
 
-        xxLines.resize(Z.size());
-        for(int i = 0; i < Z.size(); i++) xxLines[i].resize(Z[i] + 1);
+        //xxLines.resize(Z.size());
+        //for(int i = 0; i < Z.size(); i++) xxLines[i].resize(Z[i] + 1);
 
         bool fillFlag = _lgRho.empty();
 
@@ -156,15 +171,15 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
             //MixData md(Z, x, rCoeff, true, true, pow(10, lgT), pow(10, lgRho));
             md.SetTeVRho(pow(10, lgT), pow(10, lgRho));
 
-            double xe = mixSolver.GetFullIonizationInfo(md);
-            ionizationLine.push_back(xe);
+            mixSolver.GetFullIonizationInfo(md);
+            fullLine.push_back(md.GetSahaPoint());
 
             //std::cout << "{" << xe - md.xe() << "}";
 
-            for(int i = 0; i < Z.size(); i++)
+            /*for(int i = 0; i < Z.size(); i++)
             {
                 for(int j = 0; j <= Z[i]; j++) xxLines[i][j].push_back(md.xx[i][j]);
-            }
+            }*/
 
             if(fillFlag)
             {
@@ -173,15 +188,15 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
             }
         }
 
-        for(int i = 0; i < Z.size(); i++)
+        /*for(int i = 0; i < Z.size(); i++)
         {
             for(int j = 0; j <= Z[i]; j++)
             {
                 xxTable[i][j].push_back(xxLines[i][j]);
             }
-        }
+        }*/
 
-        ionizationTable.push_back(ionizationLine);
+        fullTable.push_back(fullLine);
     }
 
     std::fstream f(filename.c_str(), std::fstream::out);
@@ -193,15 +208,18 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     outputArray(f, "lgT", lgTPhys);
     outputArray(f, "lgV", lgVa);
     outputArray(f, "lgRho", _lgRho);
-    outputTable(f, "xe_Saha", ionizationTable);
+    outputTable(f, "xe", fullTable, std::mem_fn(&SahaPoint::Xe));
+    outputTable(f, "P", fullTable, std::mem_fn(&SahaPoint::P));
+    outputTable(f, "E", fullTable, std::mem_fn(&SahaPoint::E));
+    outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S));
 
-    for(int i = 0; i < Z.size(); i++)
+    /*for(int i = 0; i < Z.size(); i++)
     {
         for(int j = 0; j <= Z[i]; j++)
         {
             outputTable(f, "x_"+std::to_string(Z[i])+"_"+std::to_string(j), xxTable[i][j]);
         }
-    }
+    }*/
 
 }
 
