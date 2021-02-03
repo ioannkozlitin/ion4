@@ -1,7 +1,7 @@
 ﻿#include "saha.h"
 #include "src/sahasolver.h"
 #include "src/atom_ed.h"
-#include "../mix/sahamixsolver.h".h"
+#include "../mix/sahamixsolver.h"
 #include <cmath>
 #include <sstream>
 #include <memory>
@@ -229,7 +229,7 @@ namespace saha
             zh = pow(zh, 2/3.0);
             zd = pow(zd, 0.5);
 
-            fprintf(f, "%6.3f %6.3f %20.15f %20.15f %20.15f ", log10(elem.T) + log_eV, log10(saha::GetA(elem.Z)) + log10(eRo) - log10(elem.V), elem.Xe, zd, zh);
+            fprintf(f, "%6.3f %6.3f %20.15f %20.15f %20.15f ", log10(elem.T) + log_eV, log10(saha::GetA((unsigned int)(elem.Z+0.5))) + log10(eRo) - log10(elem.V), elem.Xe, zd, zh);
             for(double xElem : elem.x)
             {
                 fprintf(f, "%20.15f ", xElem);
@@ -312,4 +312,13 @@ namespace saha
         return Ro;
     }
 
+    double GetMeanZ(const std::vector<unsigned int> &Z, const std::vector<double> &x)
+    {
+        double meanZ = 0;
+        for(int i = 0; i < Z.size(); i++)
+        {
+            meanZ += Z[i] * x[i];
+        }
+        return meanZ;
+    }
 } // namespace saha

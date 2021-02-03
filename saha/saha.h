@@ -60,6 +60,7 @@ namespace saha
    double GetRo(unsigned int i_Z);
    double GetA(const std::vector<unsigned int> &Z, const std::vector<double> &x);
    double GetRo(const std::vector<unsigned int> &Z, const std::vector<double> &x);
+   double GetMeanZ(const std::vector<unsigned int> &Z, const std::vector<double> &x);
    void SetTeta(double value);
    void SetCorrectV0(double value);
    void TestIonVolumes();

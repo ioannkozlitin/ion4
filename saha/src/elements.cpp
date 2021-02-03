@@ -910,6 +910,7 @@ TElement::TElement(unsigned int z, double rCoeff, bool correctV0, bool newVolume
 
         if(newVolumes)
         {
+            //printf("NEW VOLUMES\n");
             const double v0c = 21.3;
             for(unsigned int i = 1; i < z; i++)
             {

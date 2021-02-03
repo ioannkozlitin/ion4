@@ -79,7 +79,7 @@ double MixData::e()
     double Ee = sqrt(2.0)/(M_PI*M_PI) * pow(T,2.5) * vFree * I15mu_d_t(T,vFree,xe());
 
     double Efi = 0;
-    for(unsigned int i = 0; i <= elements.size(); i++)
+    for(unsigned int i = 0; i < elements.size(); i++)
     {
         for(int j = 1; j <= elements[i].Z; j++)
         {
@@ -101,7 +101,7 @@ double MixData::s()
     }
 
     double Si = 2.5;
-    for(unsigned int i = 0; i <= elements.size(); i++)
+    for(unsigned int i = 0; i < elements.size(); i++)
     {
         const double M = 1822.887 * elements[i].A;
         for (unsigned int j = 0; j <= elements[i].Z; j++)
