@@ -17,6 +17,10 @@
 #include <vector>
 #include <chrono>
 
+#include "mainwindow/mainwindow.h"
+#include "mainwindow/calculator.h"
+#include <QApplication>
+
 void outputArray(std::ostream& os, const std::string dataName, const std::vector<double> &data)
 {
    os << dataName << " = [";
@@ -243,6 +247,7 @@ void calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<d
     outputTable(f, "xe_Saha", ionizationTable);
 }
 
+/*
 int main()
 {	
 	try
@@ -275,4 +280,22 @@ int main()
 	}
 	
     return 0;
+}
+*/
+
+int main(int argc, char **argv)
+{
+    QApplication app(argc, argv);
+    MainWindow mainWindow;
+    Calculator calculator;
+
+    QObject::connect(&mainWindow, SIGNAL(startCalc(const std::vector<unsigned int>&, const std::vector<double>&, double, double, double, double, double, double, double, const std::string&)),
+                     &calculator, SLOT(start(const std::vector<unsigned int>&, const std::vector<double>&, double, double, double, double, double, double, double, const std::string&)));
+    QObject::connect(&mainWindow, SIGNAL(stopCalc()), &calculator, SLOT(stop()));
+    QObject::connect(&calculator, SIGNAL(setProgress(int)), &mainWindow, SLOT(setCalcProgress(int)));
+    QObject::connect(&calculator, SIGNAL(finished(bool)), &mainWindow, SLOT(calcFinished(bool)));
+
+    mainWindow.show();
+
+    return app.exec();
 }

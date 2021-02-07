@@ -33,22 +33,28 @@ endif()
 add_subdirectory(saha)
 add_subdirectory(mix)
 add_subdirectory(raizer)
+add_subdirectory(mainwindow)
 
 set(SOURCES_LIST ${SOURCES_LIST}
      ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 # get all needble libraries ===================================================
-
+find_package(Qt5Widgets REQUIRED)
 # find_package(quadmath)
 
 set(INCLUDE_LIST
 )
 
 set(LIBRARY_LIST
+    Qt5::Widgets
 #    quadmath
 #     gsl
 #     gslcblas
 )
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # create & link target ========================================================
 add_executable(${TARGET_NAME} ${SOURCES_LIST} ${HEADERS_LIST})
