@@ -864,7 +864,7 @@ const double elem_Ro[103]=
 
 }
 
-TElement::TElement(unsigned int z, double rCoeff, bool correctV0)
+TElement::TElement(unsigned int z, double rCoeff, bool correctV0, bool newVolumes)
 {
     if(z < 1) z = 1;
     if(z > 103) z = 103;
@@ -907,6 +907,16 @@ TElement::TElement(unsigned int z, double rCoeff, bool correctV0)
         double v0 = A * eRo / ro;
         //printf("R = %g\n",v0 / v[0]);
         v[0] = v0;
+
+        if(newVolumes)
+        {
+            //printf("NEW VOLUMES\n");
+            const double v0c = 21.3;
+            for(unsigned int i = 1; i < z; i++)
+            {
+                v[i] = (v0 - i / (z - 1.0) * (v0 - v0c)) * pow(1 - i / double(z), 3.0);
+            }
+        }
     }
 
     v[z] = 0;

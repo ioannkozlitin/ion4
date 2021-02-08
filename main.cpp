@@ -43,6 +43,21 @@ void outputTable(std::ostream& os, std::string tableName, const std::vector<std:
     os << "];" << std::endl;
 }
 
+void outputTable(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> table, std::function<double(const SahaPoint&)> accessor)
+{
+    os << tableName << " = [" << std::endl;
+    for (size_t i = 0; i < table.size(); ++i)
+    {
+        const std::vector<SahaPoint>& line = table[i];
+        for (size_t j = 0; j < line.size(); ++j)
+        {
+            os << accessor(line[j]) << " ";
+        }
+        os << std::endl;
+    }
+    os << "];" << std::endl;
+}
+
 void CrashTest(double rCoeff, double lgVMin, double lgVMax, double lgVStep, double lgTMin, double lgTMax, double lgTStep)
 {
 	for (int Z = 1; Z <= 103; Z++)
@@ -135,33 +150,40 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     std::vector<double> lgVa;
     std::vector<double> _lgRho;
 
-    std::vector<std::vector<double>> ionizationTable;
-    std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
+    std::vector<std::vector<SahaPoint>> fullTable;
+    //std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
 
-    xxTable.resize(Z.size());
-    for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
+    //xxTable.resize(Z.size());
+    //for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
+
+    MixData md(Z, x, rCoeff, true, true, 1, 1);
 
     for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
     {
         lgTPhys.push_back(lgT);
         std::cout << "[" << lgT << "]" << std::flush;
-        std::vector<double> ionizationLine;
-        std::vector<std::vector<std::vector<double>>> xxLines;
+        std::vector<SahaPoint> fullLine;
+        //std::vector<std::vector<std::vector<double>>> xxLines;
 
-        xxLines.resize(Z.size());
-        for(int i = 0; i < Z.size(); i++) xxLines[i].resize(Z[i] + 1);
+        //xxLines.resize(Z.size());
+        //for(int i = 0; i < Z.size(); i++) xxLines[i].resize(Z[i] + 1);
 
         bool fillFlag = _lgRho.empty();
 
         for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
         {
-            MixData md(Z, x, rCoeff, true, pow(10, lgT), pow(10, lgRho));
-            ionizationLine.push_back(mixSolver.GetFullIonizationInfo(md));
+            //MixData md(Z, x, rCoeff, true, true, pow(10, lgT), pow(10, lgRho));
+            md.SetTeVRho(pow(10, lgT), pow(10, lgRho));
 
-            for(int i = 0; i < Z.size(); i++)
+            mixSolver.GetFullIonizationInfo(md);
+            fullLine.push_back(md.GetSahaPoint());
+
+            //std::cout << "{" << xe - md.xe() << "}";
+
+            /*for(int i = 0; i < Z.size(); i++)
             {
                 for(int j = 0; j <= Z[i]; j++) xxLines[i][j].push_back(md.xx[i][j]);
-            }
+            }*/
 
             if(fillFlag)
             {
@@ -170,15 +192,15 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
             }
         }
 
-        for(int i = 0; i < Z.size(); i++)
+        /*for(int i = 0; i < Z.size(); i++)
         {
             for(int j = 0; j <= Z[i]; j++)
             {
                 xxTable[i][j].push_back(xxLines[i][j]);
             }
-        }
+        }*/
 
-        ionizationTable.push_back(ionizationLine);
+        fullTable.push_back(fullLine);
     }
 
     std::fstream f(filename.c_str(), std::fstream::out);
@@ -190,15 +212,18 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     outputArray(f, "lgT", lgTPhys);
     outputArray(f, "lgV", lgVa);
     outputArray(f, "lgRho", _lgRho);
-    outputTable(f, "xe_Saha", ionizationTable);
+    outputTable(f, "xe", fullTable, std::mem_fn(&SahaPoint::Xe));
+    outputTable(f, "P", fullTable, std::mem_fn(&SahaPoint::P));
+    outputTable(f, "E", fullTable, std::mem_fn(&SahaPoint::E));
+    outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S));
 
-    for(int i = 0; i < Z.size(); i++)
+    /*for(int i = 0; i < Z.size(); i++)
     {
         for(int j = 0; j <= Z[i]; j++)
         {
             outputTable(f, "x_"+std::to_string(Z[i])+"_"+std::to_string(j), xxTable[i][j]);
         }
-    }
+    }*/
 
 }
 
@@ -222,7 +247,7 @@ void calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<d
 
         for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
         {
-            MixData md(Z, x, 0.0, false, pow(10, lgT), pow(10, lgRho));
+            MixData md(Z, x, 0.0, false, false, pow(10, lgT), pow(10, lgRho));
             ionizationLine.push_back(mixSolver(md));
 
             if(fillFlag)
@@ -253,7 +278,7 @@ int main()
 	try
 	{
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -1.159046, -1.159046, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
-
+        /*
         double t0 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.51, 4.6, 0.1, "CuOld.m");
         double t1 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
@@ -261,6 +286,7 @@ int main()
         double t2 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
         printf("\ndt1 = %g dt2 = %g\n", (t1-t0)*1000, (t2-t1)*1000);
+        */
 
         //calculatorMixRaizer({29}, {1}, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuRaizer.m");
 
@@ -270,9 +296,9 @@ int main()
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
         //calculatorMix({7,8}, {0.79, 0.21}, 0.6, -6, 6, 0.1, 0, 2, 0.01, "air.m");
 
-        //double rho = log10(1.29e-3);
+        double rho = log10(1.29e-3);
         //calculatorMix({7,8}, {0.79, 0.21}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
-        //calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
+        calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
 	}
 	catch (std::exception& r)
 	{

@@ -8,7 +8,7 @@
 
 struct SahaPoint
 {
-   unsigned int Z;  // атомный номер
+   double Z;  // атомный номер
    double T;		// температура, а. е.
    double V;		// объём атомной ячейки, а. е.
    double P;		// давление, а. е.
