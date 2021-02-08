@@ -4,6 +4,10 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>
+#include <cmath>
+#include <limits>
+
+#define MIX_COMPONENTS_NUM 3
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,10 +23,16 @@ MainWindow::MainWindow(QWidget *parent)
     _sortedElements = _elements;
     qSort(_sortedElements);
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < MIX_COMPONENTS_NUM; i++)
     {
         on_addItemPushButton_clicked();
     }
+
+    _ui->mixScrollArea->setFixedHeight(_ui->mixScrollAreaWidget->layout()->sizeHint().height());
+
+    setFixedSize(0, 0);
+
+    enableEditing(true);
 }
 
 MainWindow::~MainWindow()
@@ -43,6 +53,8 @@ void MainWindow::calcFinished(bool isSuccess)
     {
         QMessageBox::information(this, "Сообщение", "Результат вычислений сохранен в файл");
     }
+
+    enableEditing(true);
 }
 
 void MainWindow::on_addItemPushButton_clicked()
@@ -61,10 +73,12 @@ void MainWindow::on_addItemPushButton_clicked()
     connect(comboBox, &QComboBox::currentTextChanged, doubleSpinBox, [doubleSpinBox] (const QString &text) { doubleSpinBox->setEnabled(text != ""); });
 
     QGridLayout *layout = (QGridLayout*)_ui->mixScrollAreaWidget->layout();
-    int row = layout->count() / 2;
+    int newRow = layout->count() / 2;
 
-    layout->addWidget(comboBox, row, 0);
-    layout->addWidget(doubleSpinBox, row, 1);
+    layout->addWidget(comboBox, newRow, 0);
+    layout->addWidget(doubleSpinBox, newRow, 1);
+
+    _ui->removeItemPushButton->setEnabled(newRow >= MIX_COMPONENTS_NUM);
 }
 
 void MainWindow::on_removeItemPushButton_clicked()
@@ -72,7 +86,7 @@ void MainWindow::on_removeItemPushButton_clicked()
     QGridLayout *layout = (QGridLayout*)_ui->mixScrollAreaWidget->layout();
     int lastRow = layout->count() / 2 - 1;
 
-    if (lastRow > 2)
+    if (lastRow >= MIX_COMPONENTS_NUM)
     {
         disconnect(layout->itemAtPosition(lastRow, 0)->widget(), nullptr, nullptr, nullptr);
 
@@ -82,6 +96,8 @@ void MainWindow::on_removeItemPushButton_clicked()
         layout->removeWidget(layout->itemAtPosition(lastRow, 0)->widget());
         layout->removeWidget(layout->itemAtPosition(lastRow, 1)->widget());
     }
+
+    _ui->removeItemPushButton->setEnabled(lastRow > MIX_COMPONENTS_NUM);
 }
 
 void MainWindow::on_selectFilePushButton_clicked()
@@ -115,11 +131,23 @@ void MainWindow::on_calculatePushButton_clicked()
         QDoubleSpinBox *doubleSpinBox = (QDoubleSpinBox*)layout->itemAtPosition(i, 1)->widget();
         double proportion = doubleSpinBox->value();
 
-        if (elementIndex > 0)
+        if (elementIndex > 0 && fabs(proportion) > std::numeric_limits<double>::min())
         {
             Z.push_back(elementIndex);
             x.push_back(proportion);
-        }        
+        }
+    }
+
+    if (Z.empty())
+    {
+        QMessageBox::warning(this, "Ошибка", "Не заданы компоненты смеси");
+        return;
+    }
+
+    if (fabs(std::accumulate(x.begin(), x.end(), 0.0) - 1.0) > std::numeric_limits<double>::min())
+    {
+        QMessageBox::warning(this, "Ошибка", "Сумма долей компонентов смеси не равна единице");
+        return;
     }
 
     double rCoeff = 0.6;
@@ -129,12 +157,63 @@ void MainWindow::on_calculatePushButton_clicked()
     double lgTMin = _ui->lgTMinSpinBox->value();
     double lgTMax = _ui->lgTMaxSpinBox->value();
     double lgTStep = _ui->lgTStepSpinBox->value();
+
+    if (lgRhoMax < lgRhoMin)
+    {
+        QMessageBox::warning(this, "Ошибка", "Неверно заданы lgRho");
+        return;
+    }
+
+    if (lgTMax < lgTMin)
+    {
+        QMessageBox::warning(this, "Ошибка", "Неверно заданы lgT");
+        return;
+    }
+
     std::string filePath = _ui->filePathLineEdit->text().toStdString();
 
+    if (filePath.empty())
+    {
+        QMessageBox::warning(this, "Ошибка", "Не выбран файл");
+        return;
+    }
+
+    enableEditing(false);
     emit startCalc(Z, x, rCoeff, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, filePath);
 }
 
 void MainWindow::on_cancelPushButton_clicked()
 {
     emit stopCalc();
+}
+
+void MainWindow::enableEditing(bool isEnabled)
+{
+    _ui->elementLabel->setEnabled(isEnabled);
+    _ui->proportionLabel->setEnabled(isEnabled);
+    _ui->mixScrollArea->setEnabled(isEnabled);
+    _ui->addItemPushButton->setEnabled(isEnabled);
+
+    int rowNum = ((QGridLayout*)_ui->mixScrollAreaWidget->layout())->count() / 2;
+    _ui->removeItemPushButton->setEnabled(isEnabled && rowNum > MIX_COMPONENTS_NUM);
+
+    _ui->minLabel->setEnabled(isEnabled);
+    _ui->maxLabel->setEnabled(isEnabled);
+    _ui->stepLabel->setEnabled(isEnabled);
+    _ui->lgRhoLabel->setEnabled(isEnabled);
+    _ui->lgRhoMinSpinBox->setEnabled(isEnabled);
+    _ui->lgRhoMaxSpinBox->setEnabled(isEnabled);
+    _ui->lgRhoStepSpinBox->setEnabled(isEnabled);
+    _ui->lgTLabel->setEnabled(isEnabled);
+    _ui->lgTMinSpinBox->setEnabled(isEnabled);
+    _ui->lgTMaxSpinBox->setEnabled(isEnabled);
+    _ui->lgTStepSpinBox->setEnabled(isEnabled);
+
+    _ui->fileLabel->setEnabled(isEnabled);
+    _ui->filePathLineEdit->setEnabled(isEnabled && !_ui->filePathLineEdit->text().isEmpty());
+    _ui->selectFilePushButton->setEnabled(isEnabled);
+
+    _ui->progressBar->setEnabled(!isEnabled);
+    _ui->calculatePushButton->setEnabled(isEnabled);
+    _ui->cancelPushButton->setEnabled(!isEnabled);
 }

@@ -29,6 +29,8 @@ signals:
     void stopCalc();
 
 private:
+    void enableEditing(bool isEnabled);
+
     Ui::MainWindow *_ui;
 
     QStringList _elements;
