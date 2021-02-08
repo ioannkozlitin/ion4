@@ -2,6 +2,7 @@
 #define CALCULATOR_H
 
 #include <QThread>
+#include "mix/sahamixsolver.h"
 
 class Calculator : public QThread
 {
@@ -20,8 +21,8 @@ signals:
     void finished(bool isSuccess);
 
 private:
-    void outputArray(std::ostream& os, const std::string dataName, const std::vector<double> &data);
-    void outputTable(std::ostream& os, std::string tableName, const std::vector<std::vector<double>> &table);
+    void outputArray(std::ostream &os, const std::string dataName, const std::vector<double> &data);
+    void outputTable(std::ostream &os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> table, std::function<double(const SahaPoint&)> accessor);
     void run();
     void exit(int retcode);
 

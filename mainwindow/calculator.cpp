@@ -1,5 +1,4 @@
 #include "calculator.h"
-#include "mix/sahamixsolver.h"
 #include <cmath>
 #include <fstream>
 #include <QDebug>
@@ -45,15 +44,15 @@ void Calculator::outputArray(std::ostream &os, const std::string dataName, const
     os << "];" << std::endl;
 }
 
-void Calculator::outputTable(std::ostream &os, std::string tableName, const std::vector<std::vector<double> > &table)
+void Calculator::outputTable(std::ostream &os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> table, std::function<double(const SahaPoint&)> accessor)
 {
     os << tableName << " = [" << std::endl;
     for (size_t i = 0; i < table.size(); ++i)
     {
-        const std::vector<double>& line = table[i];
+        const std::vector<SahaPoint>& line = table[i];
         for (size_t j = 0; j < line.size(); ++j)
         {
-            os << (line[j]) << " ";
+            os << accessor(line[j]) << " ";
         }
         os << std::endl;
     }
@@ -71,20 +70,14 @@ void Calculator::run()
     std::vector<double> lgVa;
     std::vector<double> _lgRho;
 
-    std::vector<std::vector<double>> ionizationTable;
-    std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
+    std::vector<std::vector<SahaPoint>> fullTable;
 
-    xxTable.resize(_Z.size());
-    for(int i = 0; i < _Z.size(); i++) xxTable[i].resize(_Z[i] + 1);
+    MixData md(_Z, _x, _rCoeff, true, true, 1, 1);
 
     for (double lgT = _lgTMax; lgT > _lgTMin - _lgTStep / 2.0; lgT -= _lgTStep)
     {
         lgTPhys.push_back(lgT);
-        std::vector<double> ionizationLine;
-        std::vector<std::vector<std::vector<double>>> xxLines;
-
-        xxLines.resize(_Z.size());
-        for(int i = 0; i < _Z.size(); i++) xxLines[i].resize(_Z[i] + 1);
+        std::vector<SahaPoint> fullLine;
 
         bool fillFlag = _lgRho.empty();
 
@@ -96,13 +89,9 @@ void Calculator::run()
                 return;
             }
 
-            MixData md(_Z, _x, _rCoeff, true, pow(10, lgT), pow(10, lgRho));
-            ionizationLine.push_back(mixSolver.GetFullIonizationInfo(md));
-
-            for(int i = 0; i < _Z.size(); i++)
-            {
-                for(int j = 0; j <= _Z[i]; j++) xxLines[i][j].push_back(md.xx[i][j]);
-            }
+            md.SetTeVRho(pow(10, lgT), pow(10, lgRho));
+            mixSolver.GetFullIonizationInfo(md);
+            fullLine.push_back(md.GetSahaPoint());
 
             if(fillFlag)
             {
@@ -114,15 +103,7 @@ void Calculator::run()
             emit setProgress(iterationNum / iterationsNum * 100.0);
         }
 
-        for(int i = 0; i < _Z.size(); i++)
-        {
-            for(int j = 0; j <= _Z[i]; j++)
-            {
-                xxTable[i][j].push_back(xxLines[i][j]);
-            }
-        }
-
-        ionizationTable.push_back(ionizationLine);
+        fullTable.push_back(fullLine);
     }
 
     std::fstream f(_filePath.c_str(), std::fstream::out);
@@ -134,15 +115,10 @@ void Calculator::run()
     outputArray(f, "lgT", lgTPhys);
     outputArray(f, "lgV", lgVa);
     outputArray(f, "lgRho", _lgRho);
-    outputTable(f, "xe_Saha", ionizationTable);
-
-    for(int i = 0; i < _Z.size(); i++)
-    {
-        for(int j = 0; j <= _Z[i]; j++)
-        {
-            outputTable(f, "x_"+std::to_string(_Z[i])+"_"+std::to_string(j), xxTable[i][j]);
-        }
-    }
+    outputTable(f, "xe", fullTable, std::mem_fn(&SahaPoint::Xe));
+    outputTable(f, "P", fullTable, std::mem_fn(&SahaPoint::P));
+    outputTable(f, "E", fullTable, std::mem_fn(&SahaPoint::E));
+    outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S));
 
     f.close();
     exit(0);
