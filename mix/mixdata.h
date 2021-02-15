@@ -26,6 +26,8 @@ public:
     double p();
     double e();
     double s();
+    double si();
+    double se();
     double getZd(double xe);
     double getRd(double V);
 

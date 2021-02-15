@@ -95,7 +95,7 @@ double MixData::e()
 
 double MixData::s()
 {
-    double vFree = vfree();
+/*    double vFree = vfree();
     double _xe = xe();
 
     double Se = 0;
@@ -116,7 +116,41 @@ double MixData::s()
             }
         }
     }
-    return Si + Se;
+*/
+    return si() + se();
+}
+
+double MixData::si()
+{
+    double vFree = vfree();
+    double Si = 2.5;
+    for(unsigned int i = 0; i < elements.size(); i++)
+    {
+        const double M = 1822.887 * elements[i].A;
+        for (unsigned int j = 0; j <= elements[i].Z; j++)
+        {
+            if (xx[i][j] > 0)
+            {
+                Si += xx[i][j] * (elements[i].logG[j] + log(vFree) - log(xx[i][j]) + 1.5 * log(M * T / 2.0 / M_PI));
+            }
+        }
+    }
+
+    return Si;
+}
+
+double MixData::se()
+{
+    double vFree = vfree();
+    double _xe = xe();
+
+    double Se = 0;
+    if(_xe > 0)
+    {
+        Se = sqrt(2.0) / (M_PI*M_PI) * pow(t, 1.5) * vFree * (5.0 / 3.0 * I15mu_d_t(t, vFree, _xe) - mu(t,vFree,_xe) / t * I05mu_d_t(t, vFree, _xe));
+    }
+
+    return Se;
 }
 
 double MixData::getZd(double xe)
@@ -159,6 +193,7 @@ SahaPoint MixData::GetSahaPoint()
     SahaPoint result;
 
     double vFree = vfree();
+    double _si = si(), _se = se();
 
     result.Z = maxZ;
     result.T = T;
@@ -166,12 +201,12 @@ SahaPoint MixData::GetSahaPoint()
     result.V = V;
     result.E = e();
     result.P = p();
-    result.S = s();
+    result.S = _si + _se;
     result.Xe = xe();
-    result.M = mu(T, vFree, result.Xe);
-    result.F = result.E - T * result.S;
+    result.M = mu(t, vFree, result.Xe);
+    result.F = result.E - t * _se - T * _si;
     result.vFactor = vFree / V;
-    result.IMu = I05mu_d_t(T,vFree,result.Xe);
+    result.IMu = I05mu_d_t(t,vFree,result.Xe);
     result.K = pow(result.IMu,1.5);
     result.vError = 0;
     result.auxIt = 0;
