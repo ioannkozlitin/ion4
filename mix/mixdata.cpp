@@ -4,12 +4,13 @@
 #include "../saha/src/atom_ed.h"
 #include "../saha/src/mu_fi.h"
 
-MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double T, double V, bool TVaeFlag)
+MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double T, double t, double V, bool TVaeFlag)
 {
     if(TVaeFlag)
     {
         this->T = T;
         this->V = V;
+        this->t = t;
     }
     else
     {
@@ -20,23 +21,26 @@ MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &
     initZX(Z, x, rCoeff, correctV0, newVolumes);
 }
 
-MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double TeV, double Rho)
+MixData::MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double TeV, double teV, double Rho)
 {
     initZX(Z, x, rCoeff, correctV0, newVolumes);
 
     this->V = meanA * eRo / Rho;
     this->T = TeV / eFi;
+    this->t = teV / eFi;
 }
 
-double MixData::SetTeVRho(double TeV, double Rho)
+double MixData::SetTeVRho(double TeV, double teV, double Rho)
 {
     V = meanA * eRo / Rho;
     T = TeV / eFi;
+    t = teV / eFi;
 }
 
-double MixData::SetTVae(double T, double V)
+double MixData::SetTVae(double T, double t, double V)
 {
     this->T = T;
+    this->t = t;
     this->V = V;
 }
 
@@ -70,13 +74,13 @@ double MixData::vfree()
 
 double MixData::p()
 {
-    return 2*sqrt(2.0)/(3*M_PI*M_PI) * pow(T,2.5) * I15mu_d_t(T,vfree(),xe()) + T / vfree();
+    return 2*sqrt(2.0)/(3*M_PI*M_PI) * pow(t,2.5) * I15mu_d_t(t,vfree(),xe()) + T / vfree();
 }
 
 double MixData::e()
 {
     double vFree = vfree();
-    double Ee = sqrt(2.0)/(M_PI*M_PI) * pow(T,2.5) * vFree * I15mu_d_t(T,vFree,xe());
+    double Ee = sqrt(2.0)/(M_PI*M_PI) * pow(t,2.5) * vFree * I15mu_d_t(t,vFree,xe());
 
     double Efi = 0;
     for(unsigned int i = 0; i < elements.size(); i++)
@@ -86,7 +90,7 @@ double MixData::e()
             Efi += elements[i].cumFi[j-1] * xx[i][j];
         }
     }
-    return 1.5 * T + Ee  + Efi;
+    return 1.5 * T + Ee + Efi;
 }
 
 double MixData::s()
@@ -97,7 +101,7 @@ double MixData::s()
     double Se = 0;
     if(_xe > 0)
     {
-        Se = sqrt(2.0) / (M_PI*M_PI) * pow(T, 1.5) * vFree * (5.0 / 3.0 * I15mu_d_t(T, vFree, _xe) - mu(T,vFree,_xe) / T * I05mu_d_t(T, vFree, _xe));
+        Se = sqrt(2.0) / (M_PI*M_PI) * pow(t, 1.5) * vFree * (5.0 / 3.0 * I15mu_d_t(t, vFree, _xe) - mu(t,vFree,_xe) / t * I05mu_d_t(t, vFree, _xe));
     }
 
     double Si = 2.5;
@@ -158,6 +162,7 @@ SahaPoint MixData::GetSahaPoint()
 
     result.Z = maxZ;
     result.T = T;
+    result.t = t;
     result.V = V;
     result.E = e();
     result.P = p();

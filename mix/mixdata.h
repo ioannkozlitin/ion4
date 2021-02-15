@@ -8,17 +8,18 @@
 class MixData
 {
 public:
-    MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double T, double V, bool TVaeFlag);
-    MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double TeV, double Rho);
+    MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double T, double t, double V, bool TVaeFlag);
+    MixData(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool correctV0, bool newVolumes, double TeV, double teV, double Rho);
     std::vector<TElement> elements;
     std::vector<double> x;
     std::vector<std::vector<double>> xx;
     double T;
+    double t;
     double maxZ;
     double meanA;
 
-    double SetTeVRho(double TeV, double Rho);
-    double SetTVae(double T, double V);
+    double SetTeVRho(double TeV, double teV, double Rho);
+    double SetTVae(double T, double t, double V);
     double GetFullV() const {return V;}
     double xe();
     double vfree();

@@ -32,12 +32,12 @@ namespace saha
         {
             if((!mixData) || (Z != mixZ) || (x != mix_x) || (ionRadiusCoeff != _ionRadiusCoeff))
             {
-                mixData.reset(new MixData(Z, x, ionRadiusCoeff, true, false, pow(10.0, i_lgT), pow(10.0, i_lgV), true));
+                mixData.reset(new MixData(Z, x, ionRadiusCoeff, true, false, pow(10.0, i_lgT), pow(10.0, i_lgT), pow(10.0, i_lgV), true));
                 mixZ = Z;mix_x = x;
             }
             else
             {
-                mixData->SetTVae(pow(10.0, i_lgT), pow(10.0, i_lgV));
+                mixData->SetTVae(pow(10.0, i_lgT), pow(10.0, i_lgT), pow(10.0, i_lgV));
             }
 
             mixSolver.GetFullIonizationInfo(*mixData);
