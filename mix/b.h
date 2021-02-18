@@ -11,7 +11,7 @@ public:
     const std::vector<std::vector<double>> &operator()(const MixData &data, double vFree, double xe);
 
 private:
-    double p0(double t, double vFree, double xe);
+    double p0(double t, double T, double vFree, double xe);
 
     Dfi dfi;
     std::vector<std::vector<double>> _B;

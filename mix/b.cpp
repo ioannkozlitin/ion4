@@ -7,7 +7,7 @@ const std::vector<std::vector<double>> &B::operator()(const MixData &data, doubl
     double _mu = mu(data.t, vFree, xe);
     _B.resize(data.xx.size());
 
-    double _p0 = p0(data.t, vFree, xe);
+    double _p0 = p0(data.t, data.T, vFree, xe);
 
     for(int i = 0; i < data.xx.size(); i++)
     {
@@ -23,7 +23,7 @@ const std::vector<std::vector<double>> &B::operator()(const MixData &data, doubl
     return _B;
 }
 
-double B::p0(double t, double vFree, double xe)
+double B::p0(double t, double T, double vFree, double xe)
 {
-    return 2*sqrt(2.0)/(3*M_PI*M_PI) * pow(t,2.5) * I15mu_d_t(t,vFree,xe) + t / vFree;
+    return 2*sqrt(2.0)/(3*M_PI*M_PI) * pow(t,2.5) * I15mu_d_t(t,vFree,xe) + T / vFree;
 }
