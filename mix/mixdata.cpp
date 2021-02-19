@@ -202,6 +202,8 @@ SahaPoint MixData::GetSahaPoint()
     result.E = e();
     result.P = p();
     result.S = _si + _se;
+    result.Si = _si;
+    result.Se = _se;
     result.Xe = xe();
     result.M = mu(t, vFree, result.Xe);
     result.F = result.E - t * _se - T * _si;

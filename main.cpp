@@ -45,6 +45,7 @@ void outputTable(std::ostream& os, const std::string &tableName, const std::vect
     for (size_t i = 0; i < table.size(); ++i)
     {
         const std::vector<SahaPoint>& line = table[i];
+        os << log10(line[0].T * eFi) << " " << log10(line[0].t * eFi) << " ";
         for (size_t j = 0; j < line.size(); ++j)
         {
             os << accessor(line[j]) << " ";
@@ -138,11 +139,10 @@ void calculatorRho_eV(unsigned int Z, double rCoeff, double lgRhoMin, double lgR
     calculator(Z, rCoeff, lgVMin, lgVMax, lgVStep, lgTMin, lgTMax, lgTStep, filename);
 }
 
-void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, std::string filename)
+void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double lgtDiffTmin,double lgtDiffTmax, std::string filename)
 {
     SahaMixSolver mixSolver;
 
-    std::vector<double> lgTPhys;
     std::vector<double> lgVa;
     std::vector<double> _lgRho;
 
@@ -155,9 +155,9 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     MixData md(Z, x, rCoeff, true, true, 1, 1, 1);
 
     for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
+    for (double lgt = lgT + lgtDiffTmax; lgt > lgT + lgtDiffTmin - lgTStep / 2.0; lgt -= lgTStep)
     {
-        lgTPhys.push_back(lgT);
-        std::cout << "[" << lgT << "]" << std::flush;
+        std::cout << "[" << lgt << " " << lgT << "]" << std::flush;
         std::vector<SahaPoint> fullLine;
         //std::vector<std::vector<std::vector<double>>> xxLines;
 
@@ -169,7 +169,7 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
         for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
         {
             //MixData md(Z, x, rCoeff, true, true, pow(10, lgT), pow(10, lgRho));
-            md.SetTeVRho(pow(10, lgT), pow(10, lgT), pow(10, lgRho));
+            md.SetTeVRho(pow(10, lgt), pow(10, lgT), pow(10, lgRho));
 
             mixSolver.GetFullIonizationInfo(md);
             fullLine.push_back(md.GetSahaPoint());
@@ -205,13 +205,14 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     f << "Z=[";for(auto &z : Z) f << z << " ";f << "];" << std::endl;
     f << "x=[";for(auto &_x : x) f << _x << " ";f << "];" << std::endl;
 
-    outputArray(f, "lgT", lgTPhys);
     outputArray(f, "lgV", lgVa);
     outputArray(f, "lgRho", _lgRho);
     outputTable(f, "xe", fullTable, std::mem_fn(&SahaPoint::Xe));
     outputTable(f, "P", fullTable, std::mem_fn(&SahaPoint::P));
     outputTable(f, "E", fullTable, std::mem_fn(&SahaPoint::E));
     outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S));
+    outputTable(f, "Si", fullTable, std::mem_fn(&SahaPoint::Si));
+    outputTable(f, "Se", fullTable, std::mem_fn(&SahaPoint::Se));
 
     /*for(int i = 0; i < Z.size(); i++)
     {
@@ -291,9 +292,9 @@ int main()
         //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
         //calculatorMix({7,8}, {0.79, 0.21}, 0.6, -6, 6, 0.1, 0, 2, 0.01, "air.m");
 
-        double rho = log10(1.29e-3);
+        //double rho = log10(1.29e-3);
         //calculatorMix({7,8}, {0.79, 0.21}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
-        calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
+        calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, -6, 1, 0.1, 0, 2, 0.1, -1, 1, "air.m");
 	}
 	catch (std::exception& r)
 	{
