@@ -10,12 +10,15 @@
 
 #include "saha/src/atom_ed.h"
 
+#include "simpleparser.h"
+
 #include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <chrono>
+#include <map>
 
 void outputArray(std::ostream& os, const std::string dataName, const std::vector<double> &data)
 {
@@ -139,7 +142,7 @@ void calculatorRho_eV(unsigned int Z, double rCoeff, double lgRhoMin, double lgR
     calculator(Z, rCoeff, lgVMin, lgVMax, lgVStep, lgTMin, lgTMax, lgTStep, filename);
 }
 
-void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double lgtDiffTmin,double lgtDiffTmax, std::string filename)
+void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double lgtDiffTmin, double lgtDiffTmax, std::string filename)
 {
     SahaMixSolver mixSolver;
 
@@ -269,32 +272,100 @@ void calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<d
     outputTable(f, "xe_Saha", ionizationTable);
 }
 
-int main()
+int main(int argc, char **argv)
 {	
 	try
 	{
-        //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -1.159046, -1.159046, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
-        /*
-        double t0 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        calculatorRho_eV(29, 0.6, -6, 6, 0.1, -2.51, 4.6, 0.1, "CuOld.m");
-        double t1 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        calculatorMix({29}, {1}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuNew.m");
-        double t2 = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        std::string taskFileName, outputFileName;
+        if(argc != 3)
+        {
+            std::cout << "Формат вызова: ./ion4 taskFileName outputFileName\n";
+            return -1;
+        }
+        else
+        {
+            taskFileName = std::string(argv[1]);
+            outputFileName = std::string(argv[2]);
+        }
 
-        printf("\ndt1 = %g dt2 = %g\n", (t1-t0)*1000, (t2-t1)*1000);
-        */
+        taskType task;
+        SimpleParser parser(taskFileName);
+        parser.GetTask(task);
 
-        //calculatorMixRaizer({29}, {1}, -6, 6, 0.1, -2.5, 4.6, 0.1, "CuRaizer.m");
+        std::vector<unsigned int> Z;
+        std::vector<double> x;
+        double lgRhoMin, lgRhoMax, lgRhoStep;
+        double lgTMin, lgTMax, lgTStep;
+        double lgtDiffTmin, lgtDiffTmax;
+        double rCoeff;
 
-        //calculatorRho_eV(29, 0.6, 4.199, 4.2, 0.1, -2.51, -2.5, 0.1, "CuTest0.m");
-        //calculatorMix({29}, {1}, 0.6, 4.2, 4.2, 0.1, -2.5, -2.5, 0.1, "CuTest1.m");
+        if(task["Z"].empty())
+        {
+            std::cout << "Задайте компоненты смеси\n";
+            return -1;
+        }
+        else
+        {
+            for(double item : task["Z"]) Z.push_back(item + 0.5);
+        }
 
-        //calculatorMix({18,36}, {0.5, 0.5}, 0.6, -6, 6, 0.1, -2.5, 4.6, 0.1, "ArKr.m");
-        //calculatorMix({7,8}, {0.79, 0.21}, 0.6, -6, 6, 0.1, 0, 2, 0.01, "air.m");
+        if(task["Z"].size() != task["x"].size())
+        {
+            std::cout << "Задайте концентрации для каждой компоненты\n";
+            return -1;
+        }
+        else
+        {
+            x = task["x"];
+        }
 
-        //double rho = log10(1.29e-3);
-        //calculatorMix({7,8}, {0.79, 0.21}, 0, rho, rho + 0.05, 0.1, 0, 2, 0.01, "air.m");
-        calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0, -6, 1, 0.1, 0, 2, 0.1, -1, 1, "air.m");
+        if(task["lgRho"].size() != 3)
+        {
+            std::cout << "Задайте диапазон по плотности\n";
+            return -1;
+        }
+        else
+        {
+            lgRhoMin = task["lgRho"][0];
+            lgRhoMax = task["lgRho"][1];
+            lgRhoStep = task["lgRho"][2];
+        }
+
+        if(task["lgT"].size() != 3)
+        {
+            std::cout << "Задайте диапазон по ионной температуре\n";
+            return -1;
+        }
+        else
+        {
+            lgTMin = task["lgT"][0];
+            lgTMax = task["lgT"][1];
+            lgTStep = task["lgT"][2];
+        }
+
+        if(task["lgtDiffT"].size() != 2)
+        {
+            std::cout << "Задайте диапазон отличия электронной температуры от ионной\n";
+            return -1;
+        }
+        else
+        {
+            lgtDiffTmin = task["lgtDiffT"][0];
+            lgtDiffTmax = task["lgtDiffT"][1];
+        }
+
+        if(task["rCoeff"].size() != 1)
+        {
+            std::cout << "Задайте коэффициент объема ионных остовов\n";
+            return -1;
+        }
+        else
+        {
+            rCoeff = task["rCoeff"][0];
+        }
+
+        calculatorMix(Z, x, rCoeff, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, lgtDiffTmin, lgtDiffTmax, outputFileName);
+        //calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0.6, -6, 1, 0.1, 0, 2, 0.1, -1, 1, "air.m");
 	}
 	catch (std::exception& r)
 	{
