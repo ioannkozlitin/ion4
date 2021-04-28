@@ -8,6 +8,8 @@
 
 namespace saha
 {
+    std::map<unsigned int, ElementStruct> externalElements;
+
     static double externalAtomicWeight = 0;
     static double externalRho = 0;
     static double teta = 0;
@@ -321,4 +323,19 @@ namespace saha
         }
         return meanZ;
     }
+
+    void SetExternalFi(unsigned int z, const std::vector<double> &fi)
+    {
+        externalElements[z].fi = fi;
+        externalElements[z].A = GetA(z);
+        externalElements[z].ro = GetRo(z);
+    }
+
+    void SetExternalG(unsigned int z, const std::vector<double> &g)
+    {
+        externalElements[z].g = g;
+        externalElements[z].A = GetA(z);
+        externalElements[z].ro = GetRo(z);
+    }
+
 } // namespace saha

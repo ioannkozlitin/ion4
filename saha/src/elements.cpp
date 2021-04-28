@@ -879,24 +879,45 @@ TElement::TElement(unsigned int z, double rCoeff, bool correctV0, bool newVolume
     logG.resize(z+1, log(2.0));
     logG[z] = 0;
 
-    //printf("z = %d : ",z);
-
-    double sum = 0;
     for(unsigned int i = 0; i < z; i++)
     {
-        //fi[i] = elem_fi[z-1][i] / eFi;
 #ifdef NIST_IONIZATION_POTENTIALS
         if(z <= 100) fi[i] = nistIon[z-1][i] / eFi;
         else fi[i] = elem_fi[z-1][i] / eFi;
 #else
         fi[i] = elem_fi[z-1][i] / eFi;
 #endif
+    //double A = 0.53, B = 0.0347;
+    //fi[i] = A * (i+1) * z / (z - i) + B * (i+1) * i;
+    }
 
-        //printf("%g ",nistIon[z-1][i] / elem_fi[z-1][i]);
 
-        //double A = 0.53, B = 0.0347;
-        //fi[i] = A * (i+1) * z / (z - i) + B * (i+1) * i;
-        //printf("%g ",fi[i]);
+    if(saha::externalElements.find(z) != saha::externalElements.end())
+    {
+        //printf("Ext element\n");
+
+        saha::ElementStruct &extElement = saha::externalElements[z];
+
+        A = extElement.A;
+        ro = extElement.ro;
+
+        if(!extElement.fi.empty())
+        for(unsigned int i = 0; i < z; i++)
+        {
+            fi[i] = extElement.fi[i] / eFi;
+        }
+
+        if(!extElement.g.empty())
+        for(unsigned int i = 0; i < z; i++)
+        {
+            logG[i] = log(extElement.g[i]);
+        }
+
+    }
+
+    double sum = 0;
+    for(unsigned int i = 0; i < z; i++)
+    {
         v[i] = 4/3.0 * M_PI * pow(rCoeff * (i+1) / fi[i], 3.0);
         sum += fi[i];cumFi[i] = sum;
     }

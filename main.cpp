@@ -13,6 +13,7 @@
 #include "simpleparser.h"
 
 #include <cstdio>
+#include <sstream>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -42,13 +43,16 @@ void outputTable(std::ostream& os, std::string tableName, const std::vector<std:
     os << "];" << std::endl;
 }
 
-void outputTable(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> table, std::function<double(const SahaPoint&)> accessor)
+void outputTable(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> &table, std::function<double(const SahaPoint&)> accessor, bool printT)
 {
     os << tableName << " = [" << std::endl;
     for (size_t i = 0; i < table.size(); ++i)
     {
         const std::vector<SahaPoint>& line = table[i];
-        os << log10(line[0].T * eFi) << " " << log10(line[0].t * eFi) << " ";
+        if(printT)
+        {
+            os << log10(line[0].T * eFi) << " " << log10(line[0].t * eFi) << " ";
+        }
         for (size_t j = 0; j < line.size(); ++j)
         {
             os << accessor(line[j]) << " ";
@@ -150,18 +154,23 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     std::vector<double> _lgRho;
 
     std::vector<std::vector<SahaPoint>> fullTable;
+    std::vector<double> lgTPhys;
     //std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
 
     //xxTable.resize(Z.size());
     //for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
 
     MixData md(Z, x, rCoeff, true, true, 1, 1, 1);
+    bool is2T = (lgtDiffTmax > lgtDiffTmin);
 
     for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
     for (double lgt = lgT + lgtDiffTmax; lgt > lgT + lgtDiffTmin - lgTStep / 2.0; lgt -= lgTStep)
-    {
+    {        
         std::cout << "[" << lgt << " " << lgT << "]" << std::flush;
         std::vector<SahaPoint> fullLine;
+
+        if(!is2T) lgTPhys.push_back(lgT);
+
         //std::vector<std::vector<std::vector<double>>> xxLines;
 
         //xxLines.resize(Z.size());
@@ -209,13 +218,15 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     f << "x=[";for(auto &_x : x) f << _x << " ";f << "];" << std::endl;
 
     outputArray(f, "lgV", lgVa);
-    outputArray(f, "lgRho", _lgRho);
-    outputTable(f, "xe", fullTable, std::mem_fn(&SahaPoint::Xe));
-    outputTable(f, "P", fullTable, std::mem_fn(&SahaPoint::P));
-    outputTable(f, "E", fullTable, std::mem_fn(&SahaPoint::E));
-    outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S));
-    outputTable(f, "Si", fullTable, std::mem_fn(&SahaPoint::Si));
-    outputTable(f, "Se", fullTable, std::mem_fn(&SahaPoint::Se));
+    outputArray(f, "lgRho", _lgRho);    
+    if(!is2T) outputArray(f, "lgT", lgTPhys);
+
+    outputTable(f, "xe", fullTable, std::mem_fn(&SahaPoint::Xe), is2T);
+    outputTable(f, "P", fullTable, std::mem_fn(&SahaPoint::P), is2T);
+    outputTable(f, "E", fullTable, std::mem_fn(&SahaPoint::E), is2T);
+    outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S), is2T);
+    outputTable(f, "Si", fullTable, std::mem_fn(&SahaPoint::Si), is2T);
+    outputTable(f, "Se", fullTable, std::mem_fn(&SahaPoint::Se), is2T);
 
     /*for(int i = 0; i < Z.size(); i++)
     {
@@ -364,8 +375,26 @@ int main(int argc, char **argv)
             rCoeff = task["rCoeff"][0];
         }
 
+        for(auto &taskItem : task)
+        {
+            size_t uPos = taskItem.first.find_first_of('_');
+            if(uPos != std::string::npos)
+            {
+                std::string key = taskItem.first.substr(0, uPos);
+                std::stringstream ss(taskItem.first.substr(uPos + 1));
+                unsigned int z;ss >> z;
+                if(key == "extFi")
+                {
+                    saha::SetExternalFi(z, taskItem.second);
+                }
+                else if(key == "extG")
+                {
+                    saha::SetExternalG(z, taskItem.second);
+                }
+            }
+        }
+
         calculatorMix(Z, x, rCoeff, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, lgtDiffTmin, lgtDiffTmax, outputFileName);
-        //calculatorMix({7,8,18}, {0.7811, 0.2095, 0.0094}, 0.6, -6, 1, 0.1, 0, 2, 0.1, -1, 1, "air.m");
 	}
 	catch (std::exception& r)
 	{

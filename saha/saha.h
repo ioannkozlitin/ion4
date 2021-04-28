@@ -3,9 +3,17 @@
 
 #include <stdexcept>
 #include <vector>
+#include <map>
 
 namespace saha
 {
+    struct ElementStruct
+    {
+        double A;
+        double ro;
+        std::vector<double> fi;
+        std::vector<double> g;
+    };
 
    // Точка расчета по модели Саха
    struct Point
@@ -64,6 +72,10 @@ namespace saha
    void SetTeta(double value);
    void SetCorrectV0(double value);
    void TestIonVolumes();
+   void SetExternalFi(unsigned int z, const std::vector<double> &fi);
+   void SetExternalG(unsigned int z, const std::vector<double> &g);
+
+   extern std::map<unsigned int, ElementStruct> externalElements;
 } // namespace
 
 #endif
