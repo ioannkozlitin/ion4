@@ -154,13 +154,13 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     std::vector<double> _lgRho;
 
     std::vector<std::vector<SahaPoint>> fullTable;
-    std::vector<double> lgTPhys;
+    std::vector<double> lgTPhys, TkeV;
     //std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
 
     //xxTable.resize(Z.size());
     //for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
 
-    MixData md(Z, x, rCoeff, true, true, 1, 1, 1);
+    MixData md(Z, x, rCoeff, rCoeff > 0, rCoeff > 0, 1, 1, 1);
     bool is2T = (lgtDiffTmax > lgtDiffTmin);
 
     for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
@@ -169,7 +169,11 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
         std::cout << "[" << lgt << " " << lgT << "]" << std::flush;
         std::vector<SahaPoint> fullLine;
 
-        if(!is2T) lgTPhys.push_back(lgT);
+        if(!is2T)
+        {
+            lgTPhys.push_back(lgT);
+            TkeV.push_back(0.001 * pow(10, lgT));
+        }
 
         //std::vector<std::vector<std::vector<double>>> xxLines;
 
@@ -219,11 +223,21 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
 
     outputArray(f, "lgV", lgVa);
     outputArray(f, "lgRho", _lgRho);    
-    if(!is2T) outputArray(f, "lgT", lgTPhys);
+    if(!is2T)
+    {
+        outputArray(f, "lgT", lgTPhys);
+        outputArray(f, "TkeV", TkeV);
+    }
 
     outputTable(f, "xe", fullTable, std::mem_fn(&SahaPoint::Xe), is2T);
+    outputTable(f, "mu", fullTable, std::mem_fn(&SahaPoint::M), is2T);
+    outputTable(f, "F", fullTable, std::mem_fn(&SahaPoint::F), is2T);
     outputTable(f, "P", fullTable, std::mem_fn(&SahaPoint::P), is2T);
+    outputTable(f, "Pi", fullTable, std::mem_fn(&SahaPoint::Pi), is2T);
+    outputTable(f, "Pe", fullTable, std::mem_fn(&SahaPoint::Pe), is2T);
     outputTable(f, "E", fullTable, std::mem_fn(&SahaPoint::E), is2T);
+    outputTable(f, "Ei", fullTable, std::mem_fn(&SahaPoint::Ei), is2T);
+    outputTable(f, "Ee", fullTable, std::mem_fn(&SahaPoint::Ee), is2T);
     outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S), is2T);
     outputTable(f, "Si", fullTable, std::mem_fn(&SahaPoint::Si), is2T);
     outputTable(f, "Se", fullTable, std::mem_fn(&SahaPoint::Se), is2T);
@@ -373,6 +387,16 @@ int main(int argc, char **argv)
         else
         {
             rCoeff = task["rCoeff"][0];
+        }
+
+        if(task["GPaKJ"].size() > 0)
+        {
+            MixData::SetOutputFormat(MixData::GPaKJ);
+        }
+
+        if(task["TPaMJ"].size() > 0)
+        {
+            MixData::SetOutputFormat(MixData::TPaMJ);
         }
 
         for(auto &taskItem : task)
