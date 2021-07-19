@@ -62,7 +62,7 @@ void outputTable(std::ostream& os, const std::string &tableName, const std::vect
     os << "];" << std::endl;
 }
 
-void outputTablePartTXT(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> &table, const std::vector<double> rho, std::function<double(const SahaPoint&)> accessor)
+void outputTablePartTXT(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> &table, const std::vector<double> &rho, std::function<double(const SahaPoint&)> accessor)
 {
     os << tableName << "\n   Te    Ro= ";
 
