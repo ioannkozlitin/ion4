@@ -146,7 +146,7 @@ void calculatorRho_eV(unsigned int Z, double rCoeff, double lgRhoMin, double lgR
     calculator(Z, rCoeff, lgVMin, lgVMax, lgVStep, lgTMin, lgTMax, lgTStep, filename);
 }
 
-void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double lgtDiffTmin, double lgtDiffTmax, std::string filename)
+void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool newVolumes, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double lgtMin, double lgtMax, double lgtStep, bool is2T, const std::string &filename)
 {
     SahaMixSolver mixSolver;
 
@@ -155,64 +155,42 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
 
     std::vector<std::vector<SahaPoint>> fullTable;
     std::vector<double> lgTPhys, TkeV;
-    //std::vector<std::vector<std::vector<std::vector<double>>>> xxTable;
 
-    //xxTable.resize(Z.size());
-    //for(int i = 0; i < Z.size(); i++) xxTable[i].resize(Z[i] + 1);
-
-    MixData md(Z, x, rCoeff, rCoeff > 0, rCoeff > 0, 1, 1, 1);
-    bool is2T = (lgtDiffTmax > lgtDiffTmin);
+    MixData md(Z, x, rCoeff, rCoeff > 0, newVolumes, 1, 1, 1);
 
     for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
-    for (double lgt = lgT + lgtDiffTmax; lgt > lgT + lgtDiffTmin - lgTStep / 2.0; lgt -= lgTStep)
-    {        
-        std::cout << "[" << lgt << " " << lgT << "]" << std::flush;
-        std::vector<SahaPoint> fullLine;
-
+    {
         if(!is2T)
         {
             lgTPhys.push_back(lgT);
             TkeV.push_back(0.001 * pow(10, lgT));
+            lgtMax = lgtMin = lgT;
+            lgtStep = lgTStep;
         }
 
-        //std::vector<std::vector<std::vector<double>>> xxLines;
-
-        //xxLines.resize(Z.size());
-        //for(int i = 0; i < Z.size(); i++) xxLines[i].resize(Z[i] + 1);
-
-        bool fillFlag = _lgRho.empty();
-
-        for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
+        for (double lgt = lgtMax; lgt > lgtMin - lgtStep / 2.0; lgt -= lgtStep)
         {
-            //MixData md(Z, x, rCoeff, true, true, pow(10, lgT), pow(10, lgRho));
-            md.SetTeVRho(pow(10, lgt), pow(10, lgT), pow(10, lgRho));
+            std::cout << "[" << lgt << " " << lgT << "]" << std::flush;
+            std::vector<SahaPoint> fullLine;
 
-            mixSolver.GetFullIonizationInfo(md);
-            fullLine.push_back(md.GetSahaPoint());
+            bool fillFlag = _lgRho.empty();
 
-            //std::cout << "{" << xe - md.xe() << "}";
-
-            /*for(int i = 0; i < Z.size(); i++)
+            for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
             {
-                for(int j = 0; j <= Z[i]; j++) xxLines[i][j].push_back(md.xx[i][j]);
-            }*/
+                md.SetTeVRho(pow(10, lgt), pow(10, lgT), pow(10, lgRho));
 
-            if(fillFlag)
-            {
-                _lgRho.push_back(lgRho);
-                lgVa.push_back(log10(md.GetFullV()));
+                mixSolver.GetFullIonizationInfo(md);
+                fullLine.push_back(md.GetSahaPoint());
+
+                if(fillFlag)
+                {
+                    _lgRho.push_back(lgRho);
+                    lgVa.push_back(log10(md.GetFullV()));
+                }
             }
+
+            fullTable.push_back(fullLine);
         }
-
-        /*for(int i = 0; i < Z.size(); i++)
-        {
-            for(int j = 0; j <= Z[i]; j++)
-            {
-                xxTable[i][j].push_back(xxLines[i][j]);
-            }
-        }*/
-
-        fullTable.push_back(fullLine);
     }
 
     std::fstream f(filename.c_str(), std::fstream::out);
@@ -241,14 +219,6 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     outputTable(f, "S", fullTable, std::mem_fn(&SahaPoint::S), is2T);
     outputTable(f, "Si", fullTable, std::mem_fn(&SahaPoint::Si), is2T);
     outputTable(f, "Se", fullTable, std::mem_fn(&SahaPoint::Se), is2T);
-
-    /*for(int i = 0; i < Z.size(); i++)
-    {
-        for(int j = 0; j <= Z[i]; j++)
-        {
-            outputTable(f, "x_"+std::to_string(Z[i])+"_"+std::to_string(j), xxTable[i][j]);
-        }
-    }*/
 
 }
 
@@ -321,8 +291,10 @@ int main(int argc, char **argv)
         std::vector<double> x;
         double lgRhoMin, lgRhoMax, lgRhoStep;
         double lgTMin, lgTMax, lgTStep;
-        double lgtDiffTmin, lgtDiffTmax;
+        double lgtMin, lgtMax, lgtStep;
         double rCoeff;
+        bool newVolumes = false;
+        bool is2T = false;
 
         if(task["Z"].empty())
         {
@@ -368,15 +340,24 @@ int main(int argc, char **argv)
             lgTStep = task["lgT"][2];
         }
 
-        if(task["lgtDiffT"].size() != 2)
+        if(task["lgt"].size() > 0)
         {
-            std::cout << "Задайте диапазон отличия электронной температуры от ионной\n";
-            return -1;
+            is2T = true;
         }
-        else
+
+        if(is2T)
         {
-            lgtDiffTmin = task["lgtDiffT"][0];
-            lgtDiffTmax = task["lgtDiffT"][1];
+            if(task["lgt"].size() != 3)
+            {
+                std::cout << "Задайте диапазон по электронной температуре\n";
+                return -1;
+            }
+            else
+            {
+                lgtMin = task["lgt"][0];
+                lgtMax = task["lgt"][1];
+                lgtStep = task["lgt"][2];
+            }
         }
 
         if(task["rCoeff"].size() != 1)
@@ -387,6 +368,11 @@ int main(int argc, char **argv)
         else
         {
             rCoeff = task["rCoeff"][0];
+        }
+
+        if(task["newVolumes"].size() > 0)
+        {
+            newVolumes = (task["newVolumes"][0] > 0);
         }
 
         if(task["GPaKJ"].size() > 0)
@@ -418,7 +404,7 @@ int main(int argc, char **argv)
             }
         }
 
-        calculatorMix(Z, x, rCoeff, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, lgtDiffTmin, lgtDiffTmax, outputFileName);
+        calculatorMix(Z, x, rCoeff, newVolumes, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, lgtMin, lgtMax, lgtStep, is2T, outputFileName);
 	}
 	catch (std::exception& r)
 	{
