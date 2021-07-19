@@ -62,6 +62,26 @@ void outputTable(std::ostream& os, const std::string &tableName, const std::vect
     os << "];" << std::endl;
 }
 
+void outputTablePartTXT(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> &table, const std::vector<double> rho, std::function<double(const SahaPoint&)> accessor)
+{
+    os << tableName << "\n   Te    Ro= ";
+
+    for(auto &rhoItem : rho) os << rhoItem << " ";
+    os << "\n";
+
+    for (size_t i = 0; i < table.size(); ++i)
+    {
+        const std::vector<SahaPoint>& line = table[i];
+        os << line[0].t * eFi << " ";
+        for (size_t j = 0; j < line.size(); ++j)
+        {
+            os << accessor(line[j]) << " ";
+        }
+        os << std::endl;
+    }
+    os << "\n";
+}
+
 void CrashTest(double rCoeff, double lgVMin, double lgVMax, double lgVStep, double lgTMin, double lgTMax, double lgTStep)
 {
 	for (int Z = 1; Z <= 103; Z++)
@@ -177,7 +197,7 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
 
             for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
             {
-                md.SetTeVRho(pow(10, lgt), pow(10, lgT), pow(10, lgRho));
+                md.SetTeVRho(pow(10, lgT), pow(10, lgt), pow(10, lgRho));
 
                 mixSolver.GetFullIonizationInfo(md);
                 fullLine.push_back(md.GetSahaPoint());
@@ -221,6 +241,59 @@ void calculatorMix(const std::vector<unsigned int> &Z, const std::vector<double>
     outputTable(f, "Se", fullTable, std::mem_fn(&SahaPoint::Se), is2T);
 
 }
+
+void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<double> &x, double rCoeff, bool newVolumes, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, double lgtMin, double lgtMax, double lgtStep, bool is2T, const std::string &filename)
+{
+    SahaMixSolver mixSolver;
+    MixData md(Z, x, rCoeff, rCoeff > 0, newVolumes, 1, 1, 1);
+
+    std::fstream f(filename.c_str(), std::fstream::out);
+    f << std::scientific;
+
+    std::vector<double> rhoArray;
+    for(double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep) rhoArray.push_back(pow(10.0,lgRho));
+
+    for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
+    {
+        std::vector<std::vector<SahaPoint>> fullTable;
+
+        /*if(!is2T)
+        {
+            lgtMax = lgtMin = lgT;
+            lgtStep = lgTStep;
+        }*/
+
+        for (double lgt = lgtMax; lgt > lgtMin - lgtStep / 2.0; lgt -= lgtStep)
+        {
+            std::vector<SahaPoint> fullLine;
+            for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
+            {
+                md.SetTeVRho(pow(10, lgT), pow(10, lgt), pow(10, lgRho));
+
+                mixSolver.GetFullIonizationInfo(md);
+                fullLine.push_back(md.GetSahaPoint());
+            }
+
+            fullTable.push_back(fullLine);
+        }
+
+        f << "## Ti = " << pow(10, lgT) << "\n";
+
+        outputTablePartTXT(f, "xe", fullTable, rhoArray, std::mem_fn(&SahaPoint::Xe));
+        outputTablePartTXT(f, "mu", fullTable, rhoArray, std::mem_fn(&SahaPoint::M));
+        outputTablePartTXT(f, "F", fullTable, rhoArray, std::mem_fn(&SahaPoint::F));
+        outputTablePartTXT(f, "P", fullTable, rhoArray, std::mem_fn(&SahaPoint::P));
+        outputTablePartTXT(f, "Pi", fullTable, rhoArray, std::mem_fn(&SahaPoint::Pi));
+        outputTablePartTXT(f, "Pe", fullTable, rhoArray, std::mem_fn(&SahaPoint::Pe));
+        outputTablePartTXT(f, "E", fullTable, rhoArray, std::mem_fn(&SahaPoint::E));
+        outputTablePartTXT(f, "Ei", fullTable, rhoArray, std::mem_fn(&SahaPoint::Ei));
+        outputTablePartTXT(f, "Ee", fullTable, rhoArray, std::mem_fn(&SahaPoint::Ee));
+        outputTablePartTXT(f, "S", fullTable, rhoArray, std::mem_fn(&SahaPoint::S));
+        outputTablePartTXT(f, "Si", fullTable, rhoArray, std::mem_fn(&SahaPoint::Si));
+        outputTablePartTXT(f, "Se", fullTable, rhoArray, std::mem_fn(&SahaPoint::Se));
+    }
+}
+
 
 void calculatorMixRaizer(const std::vector<unsigned int> &Z, const std::vector<double> &x, double lgRhoMin, double lgRhoMax, double lgRhoStep, double lgTMin, double lgTMax, double lgTStep, std::string filename)
 {
@@ -404,7 +477,20 @@ int main(int argc, char **argv)
             }
         }
 
-        calculatorMix(Z, x, rCoeff, newVolumes, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, lgtMin, lgtMax, lgtStep, is2T, outputFileName);
+        bool TXTtableflag = false;
+        if(task["TXTtable"].size() > 0)
+        {
+            TXTtableflag = (task["TXTtable"][0] > 0);
+        }
+
+        if(TXTtableflag)
+        {
+            calculatorMixTXT(Z, x, rCoeff, newVolumes, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, lgtMin, lgtMax, lgtStep, is2T, outputFileName);
+        }
+        else
+        {
+            calculatorMix(Z, x, rCoeff, newVolumes, lgRhoMin, lgRhoMax, lgRhoStep, lgTMin, lgTMax, lgTStep, lgtMin, lgtMax, lgtStep, is2T, outputFileName);
+        }
 	}
 	catch (std::exception& r)
 	{
