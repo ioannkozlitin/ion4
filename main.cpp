@@ -64,7 +64,7 @@ void outputTable(std::ostream& os, const std::string &tableName, const std::vect
 
 void outputTablePartTXT(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> &table, const std::vector<double> &rho, std::function<double(const SahaPoint&)> accessor)
 {
-    os << tableName << "\n   Te    Ro= ";
+    os << tableName << "\n\n   Te    Ro= ";
 
     for(auto &rhoItem : rho) os << rhoItem << " ";
     os << "\n";
@@ -253,7 +253,8 @@ void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<doub
     std::vector<double> rhoArray;
     for(double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep) rhoArray.push_back(pow(10.0,lgRho));
 
-    for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep)
+    int Tii = 1;
+    for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep, Tii++)
     {
         std::vector<std::vector<SahaPoint>> fullTable;
 
@@ -277,20 +278,21 @@ void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<doub
             fullTable.push_back(fullLine);
         }
 
-        f << "## Ti = " << pow(10, lgT) << "\n";
+        std::cout << "## log Ti = " << lgT << "\n";
+        f << "## Ti(" << Tii << ") = " << pow(10, lgT) << "\n\n";
 
-        outputTablePartTXT(f, "xe", fullTable, rhoArray, std::mem_fn(&SahaPoint::Xe));
-        outputTablePartTXT(f, "mu", fullTable, rhoArray, std::mem_fn(&SahaPoint::M));
-        outputTablePartTXT(f, "F", fullTable, rhoArray, std::mem_fn(&SahaPoint::F));
-        outputTablePartTXT(f, "P", fullTable, rhoArray, std::mem_fn(&SahaPoint::P));
-        outputTablePartTXT(f, "Pi", fullTable, rhoArray, std::mem_fn(&SahaPoint::Pi));
-        outputTablePartTXT(f, "Pe", fullTable, rhoArray, std::mem_fn(&SahaPoint::Pe));
-        outputTablePartTXT(f, "E", fullTable, rhoArray, std::mem_fn(&SahaPoint::E));
-        outputTablePartTXT(f, "Ei", fullTable, rhoArray, std::mem_fn(&SahaPoint::Ei));
-        outputTablePartTXT(f, "Ee", fullTable, rhoArray, std::mem_fn(&SahaPoint::Ee));
-        outputTablePartTXT(f, "S", fullTable, rhoArray, std::mem_fn(&SahaPoint::S));
-        outputTablePartTXT(f, "Si", fullTable, rhoArray, std::mem_fn(&SahaPoint::Si));
-        outputTablePartTXT(f, "Se", fullTable, rhoArray, std::mem_fn(&SahaPoint::Se));
+        outputTablePartTXT(f, "Концентрация свободных электронов (на молекулу смеси)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Xe));
+        //outputTablePartTXT(f, "mu", fullTable, rhoArray, std::mem_fn(&SahaPoint::M));
+        outputTablePartTXT(f, "Свободная энергия H (Кдж/г)", fullTable, rhoArray, std::mem_fn(&SahaPoint::F));
+        outputTablePartTXT(f, "Давление P (Гпа=10 Кбар)", fullTable, rhoArray, std::mem_fn(&SahaPoint::P));
+        outputTablePartTXT(f, "Давление P ионов (Гпа=10 Кбар)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Pi));
+        outputTablePartTXT(f, "Давление P электронов (Гпа=10 Кбар)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Pe));
+        outputTablePartTXT(f, "Внутренняя энергия E (Кдж/г)", fullTable, rhoArray, std::mem_fn(&SahaPoint::E));
+        outputTablePartTXT(f, "Внутренняя энергия E ионов (Кдж/г)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Ei));
+        outputTablePartTXT(f, "Внутренняя энергия E электронов (Кдж/г)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Ee));
+        outputTablePartTXT(f, "Энтропия S (Кдж/(г*эв))", fullTable, rhoArray, std::mem_fn(&SahaPoint::S));
+        outputTablePartTXT(f, "Энтропия S ионов (Кдж/(г*эв))", fullTable, rhoArray, std::mem_fn(&SahaPoint::Si));
+        outputTablePartTXT(f, "Энтропия S электронов (Кдж/(г*эв))", fullTable, rhoArray, std::mem_fn(&SahaPoint::Se));
     }
 }
 
