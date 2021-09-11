@@ -248,6 +248,7 @@ void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<doub
     MixData md(Z, x, rCoeff, rCoeff > 0, newVolumes, 1, 1, 1);
 
     std::fstream f(filename.c_str(), std::fstream::out);
+    f.precision(8);
     f << std::scientific;
 
     std::vector<double> rhoArray;
@@ -282,7 +283,6 @@ void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<doub
         f << "## Ti(" << Tii << ") = " << pow(10, lgT) << "\n\n";
 
         outputTablePartTXT(f, "Концентрация свободных электронов (на молекулу смеси)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Xe));
-        //outputTablePartTXT(f, "mu", fullTable, rhoArray, std::mem_fn(&SahaPoint::M));
         outputTablePartTXT(f, "Свободная энергия H (Кдж/г)", fullTable, rhoArray, std::mem_fn(&SahaPoint::F));
         outputTablePartTXT(f, "Давление P (Гпа=10 Кбар)", fullTable, rhoArray, std::mem_fn(&SahaPoint::P));
         outputTablePartTXT(f, "Давление P ионов (Гпа=10 Кбар)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Pi));
