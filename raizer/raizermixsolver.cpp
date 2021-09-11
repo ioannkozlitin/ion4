@@ -88,6 +88,7 @@ double RaizerMixSolver::getXePart(const TElement &element, double T, double fiPa
             }
         }
     }
+    return 0;
 }
 
 double RaizerMixSolver::getGamma(double fiPart, double fi, double T)

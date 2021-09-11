@@ -64,7 +64,7 @@ void outputTable(std::ostream& os, const std::string &tableName, const std::vect
 
 void outputTablePartTXT(std::ostream& os, const std::string &tableName, const std::vector<std::vector<SahaPoint>> &table, const std::vector<double> &rho, std::function<double(const SahaPoint&)> accessor)
 {
-    os << tableName << "\n\n   Te    Ro= ";
+    os << tableName << "\n\n   Te      Ro= ";
 
     for(auto &rhoItem : rho) os << rhoItem << " ";
     os << "\n";
@@ -254,19 +254,13 @@ void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<doub
     std::vector<double> rhoArray;
     for(double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep) rhoArray.push_back(pow(10.0,lgRho));
 
-    int Tii = 1;
-    for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep, Tii++)
+    auto internal_lgt_tab = [&](double lgT, int Tii)
     {
         std::vector<std::vector<SahaPoint>> fullTable;
-
-        /*if(!is2T)
-        {
-            lgtMax = lgtMin = lgT;
-            lgtStep = lgTStep;
-        }*/
-
         for (double lgt = lgtMax; lgt > lgtMin - lgtStep / 2.0; lgt -= lgtStep)
         {
+            if(!is2T) lgT = lgt;
+
             std::vector<SahaPoint> fullLine;
             for (double lgRho = lgRhoMax; lgRho > lgRhoMin - lgRhoStep / 2.0; lgRho -= lgRhoStep)
             {
@@ -279,8 +273,11 @@ void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<doub
             fullTable.push_back(fullLine);
         }
 
-        std::cout << "## log Ti = " << lgT << "\n";
-        f << "## Ti(" << Tii << ") = " << pow(10, lgT) << "\n\n";
+        if(is2T)
+        {
+            std::cout << "## log Ti = " << lgT << "\n";
+            f << "## Ti(" << Tii << ") = " << pow(10, lgT) << "\n\n";
+        }
 
         outputTablePartTXT(f, "Концентрация свободных электронов (на молекулу смеси)", fullTable, rhoArray, std::mem_fn(&SahaPoint::Xe));
         outputTablePartTXT(f, "Свободная энергия H (Кдж/г)", fullTable, rhoArray, std::mem_fn(&SahaPoint::F));
@@ -293,6 +290,19 @@ void calculatorMixTXT(const std::vector<unsigned int> &Z, const std::vector<doub
         outputTablePartTXT(f, "Энтропия S (Кдж/(г*эв))", fullTable, rhoArray, std::mem_fn(&SahaPoint::S));
         outputTablePartTXT(f, "Энтропия S ионов (Кдж/(г*эв))", fullTable, rhoArray, std::mem_fn(&SahaPoint::Si));
         outputTablePartTXT(f, "Энтропия S электронов (Кдж/(г*эв))", fullTable, rhoArray, std::mem_fn(&SahaPoint::Se));
+    };
+
+    if(is2T)
+    {
+        int Tii = 1;
+        for (double lgT = lgTMax; lgT > lgTMin - lgTStep / 2.0; lgT -= lgTStep, Tii++)
+        {
+            internal_lgt_tab(lgT, Tii);
+        }
+    }
+    else
+    {
+        internal_lgt_tab(0.0, 0);
     }
 }
 
@@ -418,6 +428,12 @@ int main(int argc, char **argv)
         if(task["lgt"].size() > 0)
         {
             is2T = true;
+        }
+        else
+        {
+            lgtMin = task["lgT"][0];
+            lgtMax = task["lgT"][1];
+            lgtStep = task["lgT"][2];
         }
 
         if(is2T)

@@ -37,6 +37,7 @@ double MixData::SetTeVRho(double TeV, double teV, double Rho)
     V = meanA * eRo / Rho;
     T = TeV / eFi;
     t = teV / eFi;
+    return 0;
 }
 
 double MixData::SetTVae(double T, double t, double V)
@@ -44,6 +45,7 @@ double MixData::SetTVae(double T, double t, double V)
     this->T = T;
     this->t = t;
     this->V = V;
+    return 0;
 }
 
 double MixData::xe()
